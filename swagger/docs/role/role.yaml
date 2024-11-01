@@ -1,0 +1,124 @@
+openapi: 3.0.0
+info:
+  title: Role API
+  description: API to manage roles in My Academic App.
+  version: "1.0.0"
+servers:
+  - url: http://localhost:3000/api
+
+paths:
+  /roles-add:
+    post:
+      summary: Create a new role
+      tags:
+        - Role
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rolename:
+                  type: string
+                  description: Name of the role
+                desc:
+                  type: string
+                  description: Description of the role
+                status:
+                  type: boolean
+                  description: Status of the role
+              required:
+                - rolename
+      responses:
+        '201':
+          description: Role created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '500':
+          description: Error creating role
+
+  /roles:
+    post:
+      summary: Retrieve all roles with pagination and filtering options
+      description: Retrieve roles with options to paginate, filter by date range, and search term
+      operationId: getAllRoles
+      tags:
+        - Role
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                paging:
+                  type: boolean
+                  description: Enable pagination
+                page:
+                  type: integer
+                  description: Page number
+                size:
+                  type: integer
+                  description: Number of items per page
+                startDate:
+                  type: string
+                  format: date
+                  description: Filter roles from this date onwards
+                endDate:
+                  type: string
+                  format: date
+                  description: Filter roles up to this date
+                term:
+                  type: string
+                  description: Search term for global search
+              required:
+                - paging
+            example:
+              paging: true
+              page: 1
+              size: 10
+              startDate: "2024-01-01"
+              endDate: "2024-12-31"
+              term: "admin"
+      responses:
+        '200':
+          description: Successful retrieval of roles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  currentPage:
+                    type: integer
+                  totalPages:
+                    type: integer
+                  itemsPerPage:
+                    type: integer
+                  totalItems:
+                    type: integer
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Role'
+        '500':
+          description: Server error
+
+components:
+  schemas:
+    Role:
+      type: object
+      properties:
+        role_id:
+          type: integer
+        rolename:
+          type: string
+        desc:
+          type: string
+        status:
+          type: boolean
+      required:
+        - role_id
+        - rolename

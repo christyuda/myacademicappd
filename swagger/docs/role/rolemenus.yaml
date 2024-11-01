@@ -1,0 +1,22 @@
+RoleMenusAPI:
+  /roles/{roleId}/menus:
+    get:
+      summary: Get menus for a role
+      tags:
+        - RoleMenus
+      parameters:
+        - in: path
+          name: roleId
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the role to get menus for
+      responses:
+        200:
+          description: A list of menus associated with the role
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Menu'

@@ -1,0 +1,12 @@
+.env
+ca.pem
+node_modules
+npm-debug.log
+```
+package-lock.json
+```
+package.json
+ca.pem
+```
+
+### 2.2.2. Create a `.env` file

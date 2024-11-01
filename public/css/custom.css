@@ -1,0 +1,9 @@
+.swagger-ui .topbar { 
+    background-color: #333; /* Mengubah warna navbar */
+}
+
+.swagger-ui .btn.authorize { 
+    background-color: #4CAF50; /* Warna untuk tombol authorize */
+}
+
+/* Tambahkan lebih banyak gaya sesuai kebutuhan */
