@@ -13,8 +13,6 @@ const Menu = sequelize.define('Menu', {
     },
     parent_id: {
         type: DataTypes.INTEGER,
-        allowNull: true, // Null for top-level menu
-        defaultValue: 0
     },
     nama_menu: {
         type: DataTypes.STRING,
@@ -39,12 +37,12 @@ const Menu = sequelize.define('Menu', {
     parent_sequence: {
         type: DataTypes.INTEGER,
         allowNull: true
-    }
+    },
 }, {
   tableName: 'menus',
   timestamps: true, // Mengaktifkan fitur timestamps
-  createdAt: 'created_at', // Menyesuaikan nama kolom untuk createdAt
-  updatedAt: 'updated_at' // Menyesuaikan nama kolom untuk updatedAt
+  created_at: 'created_at', // Menyesuaikan nama kolom untuk createdAt
+  updated_at: 'updated_at' // Menyesuaikan nama kolom untuk updatedAt
 });
 
 

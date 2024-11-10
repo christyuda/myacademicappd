@@ -1,23 +1,26 @@
 const Menu = require('../models/Menu');
 const Role = require('../models/Role');
+const RoleMenu  = require('../models/RoleMenus');
 
 exports.addMenuToRole = async (req, res) => {
-    const { roleId, menuId } = req.body;
+    const { role_id, menu_id, parent_id } = req.body;
     try {
-        const role = await Role.findByPk(roleId);
-        const menu = await Menu.findByPk(menuId);
-        if (role && menu) {
-            await role.addMenu(menu);
-            res.status(200).json({ message: 'Menu added to role successfully' });
-        } else {
-            res.status(404).json({ message: 'Role or Menu not found' });
-        }
+        // Menyimpan data langsung ke tabel rolemenus
+        const roleMenuEntry = await RoleMenu.create({
+            role_id: role_id,
+            menu_id: menu_id,
+            parent_id: parent_id || 0, // Nilai parent_id bisa null jika tidak ada
+            status: 1,                    // Default status
+            created_at: new Date(),       // Set created_at otomatis
+            updated_at: new Date()        // Set updated_at otomatis
+        });
+        
+        res.status(201).json({ message: 'Menu added to role successfully', data: roleMenuEntry });
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ message: error.message });
     }
 };
-
 
 
 // Mengambil semua menu untuk role
