@@ -9,6 +9,8 @@ const port = process.env.PORT || 3000;
 const roleRoutes = require('./routes/roleRoutes');
 const menuRoutes = require('./routes/menuRoutes');
 const roleMenus = require('./routes/roleMenuRoutes');
+const userRoutes = require('./routes/userRoutes');
+
 const setupSwagger = require('./swagger/swaggerSetup');
 
 
@@ -20,6 +22,7 @@ setupSwagger(app, 'role/role.yaml');
 app.use('/api', roleRoutes);
 app.use('/api', menuRoutes);
 app.use('/api', roleMenus);
+app.use('/api', userRoutes);
 
 
 // Rute untuk mengirim HTML dari file terpisah

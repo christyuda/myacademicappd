@@ -19,8 +19,8 @@ const Role = sequelize.define('Role', {
     status: {
         type: DataTypes.BOOLEAN,
         defaultValue: true
-    }
-    , created_at: {
+    }, 
+    created_at: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW  // Menggunakan NOW untuk nilai default
     },
@@ -32,8 +32,8 @@ const Role = sequelize.define('Role', {
     // Opsional: Sequelize options
     tableName: 'roles',
     timestamps: true,
-    created_at: 'created_at',
-    updated_at: 'updated_at'
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
 });
 
 module.exports = Role;

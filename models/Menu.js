@@ -41,8 +41,8 @@ const Menu = sequelize.define('Menu', {
 }, {
   tableName: 'menus',
   timestamps: true, // Mengaktifkan fitur timestamps
-  created_at: 'created_at', // Menyesuaikan nama kolom untuk createdAt
-  updated_at: 'updated_at' // Menyesuaikan nama kolom untuk updatedAt
+  createdAt: 'created_at',
+  updatedAt: 'updated_at'
 });
 
 
