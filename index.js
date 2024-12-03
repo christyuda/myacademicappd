@@ -10,6 +10,7 @@ const roleRoutes = require('./src/routes/roleRoutes');
 const menuRoutes = require('./src/routes/menuRoutes');
 const roleMenus = require('./src/routes/roleMenuRoutes');
 const userRoutes = require('./src/routes/userRoutes');
+const authRoutes = require('./src/routes/AuthRoutes');
 
 const setupSwagger = require('./src/swagger/swaggerSetup');
 
@@ -23,6 +24,7 @@ app.use('/api', roleRoutes);
 app.use('/api', menuRoutes);
 app.use('/api', roleMenus);
 app.use('/api', userRoutes);
+app.use('/api/auth', authRoutes);
 
 
 // Rute untuk mengirim HTML dari file terpisah
