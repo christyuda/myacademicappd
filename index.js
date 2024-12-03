@@ -1,17 +1,17 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const { sequelize, connectMySQL } = require('./config/dbConfig');
+const { sequelize, connectMySQL } = require('./src/config/dbConfig');
 const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
 
-const roleRoutes = require('./routes/roleRoutes');
-const menuRoutes = require('./routes/menuRoutes');
-const roleMenus = require('./routes/roleMenuRoutes');
-const userRoutes = require('./routes/userRoutes');
+const roleRoutes = require('./src/routes/roleRoutes');
+const menuRoutes = require('./src/routes/menuRoutes');
+const roleMenus = require('./src/routes/roleMenuRoutes');
+const userRoutes = require('./src/routes/userRoutes');
 
-const setupSwagger = require('./swagger/swaggerSetup');
+const setupSwagger = require('./src/swagger/swaggerSetup');
 
 
 app.use(cors());
