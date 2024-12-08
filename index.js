@@ -11,6 +11,10 @@ const menuRoutes = require('./src/routes/menuRoutes');
 const roleMenus = require('./src/routes/roleMenuRoutes');
 const userRoutes = require('./src/routes/userRoutes');
 const authRoutes = require('./src/routes/AuthRoutes');
+const semeesterRoutes = require('./src/routes/SemesterRoutes');
+const studentRoutes = require('./src/routes/StudentsRoutes');
+const kehadiranRoutes = require('./src/routes/KehadiranRoutes');
+const teacherRoutes = require('./src/routes/teacherRoutes');
 
 const setupSwagger = require('./src/swagger/swaggerSetup');
 
@@ -24,6 +28,11 @@ app.use('/api', roleRoutes);
 app.use('/api', menuRoutes);
 app.use('/api', roleMenus);
 app.use('/api', userRoutes);
+app.use('/api', semeesterRoutes);
+app.use('/api', studentRoutes);
+app.use('/api', teacherRoutes);
+
+app.use('/api', kehadiranRoutes);
 app.use('/api/auth', authRoutes);
 
 

@@ -22,21 +22,17 @@ const assignRoleToUser = async (req, res) => {
     const { roleId, userId } = req.body; 
 
     try {
-        // Fetch the user from the database
         const user = await userModel.findByPk(userId);
 
-        // Check if the user exists
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // If the user exists, proceed to update their role
         const [updated] = await userModel.update(
-            { role_id: roleId }, // set new role_id
-            { where: { id: userId } } // condition to identify the user
+            { role_id: roleId }, 
+            { where: { id: userId } } 
         );
 
-        // Check if the update operation was successful
         if (updated) {
             return res.status(200).json({ message: 'Role assigned successfully' });
         } else {
@@ -57,7 +53,6 @@ const getAllUsers = async (req, res) => {
     }
 };
 
-// Controller to handle fetching a single user by ID
 const getUserById = async (req, res) => {
     const userId = req.params.id;
 
@@ -73,7 +68,6 @@ const getUserById = async (req, res) => {
     }
 };
 
-// Controller to handle updating a user
 const updateUser = async (req, res) => {
     const userId = req.params.id;
     const updates = req.body;
@@ -93,7 +87,6 @@ const updateUser = async (req, res) => {
     }
 };
 
-// Controller to handle deleting a user
 const deleteUser = async (req, res) => {
     const userId = req.params.id;
 
