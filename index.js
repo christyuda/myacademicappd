@@ -4,13 +4,14 @@ const path = require('path');
 const { sequelize, connectMySQL } = require('./src/config/dbConfig');
 const cors = require('cors');
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
 const roleRoutes = require('./src/routes/roleRoutes');
 const menuRoutes = require('./src/routes/menuRoutes');
 const roleMenus = require('./src/routes/roleMenuRoutes');
 const userRoutes = require('./src/routes/userRoutes');
 const authRoutes = require('./src/routes/AuthRoutes');
+const absensiRoutes = require('./module/absensi/routes/absensiRoutes');
 
 const setupSwagger = require('./src/swagger/swaggerSetup');
 
@@ -24,6 +25,7 @@ app.use('/api', roleRoutes);
 app.use('/api', menuRoutes);
 app.use('/api', roleMenus);
 app.use('/api', userRoutes);
+app.use('/api', absensiRoutes);
 app.use('/api/auth', authRoutes);
 
 
