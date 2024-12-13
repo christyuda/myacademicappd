@@ -1,17 +1,21 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/dbConfig');
 
-const Kehadiran = sequelize.define('kehadiran', {
+const JadwalPelajaran = sequelize.define('jadwal_pelajaran', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
     },
-    student_id: {
+    kelas_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
-    jadwal_pelajaran_id: {
+    mata_pelajaran_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+    teacher_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
@@ -19,17 +23,17 @@ const Kehadiran = sequelize.define('kehadiran', {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
-    tanggal: {
-        type: DataTypes.DATE,
-        allowNull: false,
-    },
-    status: {
-        type: DataTypes.ENUM('Hadir', 'Izin', 'Sakit', 'Alfa'),
-        allowNull: false,
-    },
-    keterangan: {
+    hari: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false,
+    },
+    jam_mulai: {
+        type: DataTypes.TIME,
+        allowNull: false,
+    },
+    jam_selesai: {
+        type: DataTypes.TIME,
+        allowNull: false,
     },
     created_at: {
         type: DataTypes.DATE,
@@ -40,8 +44,8 @@ const Kehadiran = sequelize.define('kehadiran', {
         defaultValue: DataTypes.NOW,
     },
 }, {
-    tableName: 'kehadiran',
+    tableName: 'jadwal_pelajaran',
     timestamps: false,
 });
 
-module.exports = Kehadiran;
+module.exports = JadwalPelajaran;

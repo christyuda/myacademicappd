@@ -1,35 +1,34 @@
+// Model: Kelas.js
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/dbConfig');
+const Teacher = require('../models/Teachers');
 
-const Kehadiran = sequelize.define('kehadiran', {
+const Kelas = sequelize.define('kelas', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
     },
-    student_id: {
+    teacher_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
-    jadwal_pelajaran_id: {
+    nama_kelas: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    tingkat: {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
-    semester_tahun_ajaran_id: {
+    kapasitas: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-    },
-    tanggal: {
-        type: DataTypes.DATE,
         allowNull: false,
     },
     status: {
-        type: DataTypes.ENUM('Hadir', 'Izin', 'Sakit', 'Alfa'),
-        allowNull: false,
-    },
-    keterangan: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false,
+        defaultValue: 'Aktif',
     },
     created_at: {
         type: DataTypes.DATE,
@@ -40,8 +39,10 @@ const Kehadiran = sequelize.define('kehadiran', {
         defaultValue: DataTypes.NOW,
     },
 }, {
-    tableName: 'kehadiran',
+    tableName: 'kelas',
     timestamps: false,
 });
 
-module.exports = Kehadiran;
+Kelas.belongsTo(Teacher, { foreignKey: 'teacher_id', as: 'teacher' });
+
+module.exports = Kelas;
