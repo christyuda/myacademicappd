@@ -6,6 +6,9 @@ const { sendEmail } = require('../services/emailService');
 
 const SECRET_KEY = process.env.SECRET_KEY;
 
+// Penyimpanan sementara menggunakan Map
+const verificationCodes = new Map();
+
 // Register Function
 exports.register = async (req, res) => {
     try {
@@ -68,6 +71,7 @@ exports.login = async (req, res) => {
         res.status(500).json({ message: 'Login failed', error: error.message });
     }
 };
+
 exports.sendVerificationEmail = async (req, res) => {
     try {
         const { email } = req.body;
@@ -78,6 +82,9 @@ exports.sendVerificationEmail = async (req, res) => {
 
         // Generate kode verifikasi
         const verificationCode = crypto.randomInt(100000, 999999).toString();
+
+        const expiresAt = Date.now() + 24 * 60 * 60 * 1000; 
+        verificationCodes.set(email, { code: verificationCode, expiresAt });
 
         // Konten email
         const subject = 'Verifikasi Email';
@@ -168,7 +175,6 @@ exports.sendVerificationEmail = async (req, res) => {
         // Kirim email
         const previewUrl = await sendEmail(email, subject, text, html);
 
-        // Simpan kode ke database atau log (sesuaikan dengan kebutuhan Anda)
         console.log(`Kode verifikasi untuk ${email}: ${verificationCode}`);
 
         res.status(200).json({ message: 'Email verifikasi berhasil dikirim', previewUrl });
@@ -183,28 +189,43 @@ exports.verifyEmailCode = async (req, res) => {
     try {
         const { email, verificationCode } = req.body;
 
+        // Validasi input
         if (!email || !verificationCode) {
-            return res.status(400).json({ message: 'Email and verification code are required' });
+            return res.status(400).json({ message: 'Email dan kode verifikasi wajib diisi' });
         }
 
+        const storedData = verificationCodes.get(email);
+
+        if (!storedData) {
+            return res.status(400).json({ message: 'Kode verifikasi tidak ditemukan atau telah kedaluwarsa' });
+        }
+
+        if (storedData.code !== verificationCode) {
+            return res.status(400).json({ message: 'Kode verifikasi tidak valid' });
+        }
+
+        if (Date.now() > storedData.expiresAt) {
+            verificationCodes.delete(email);
+            return res.status(400).json({ message: 'Kode verifikasi telah kedaluwarsa' });
+        }
+
+        verificationCodes.delete(email);
+
+        // Cari user berdasarkan email
         const user = await Users.findOne({ where: { email } });
 
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ message: 'Pengguna tidak ditemukan' });
         }
 
-        // Periksa kode verifikasi
-        if (user.verificationCode !== verificationCode) {
-            return res.status(400).json({ message: 'Invalid verification code' });
-        }
-
+        // Update status user menjadi "terverifikasi"
         await user.update({
             status: 1,
-            verificationCode: null,
         });
 
-        res.status(200).json({ message: 'User verified successfully' });
+        res.status(200).json({ message: 'Pengguna berhasil diverifikasi' });
     } catch (error) {
-        res.status(500).json({ message: 'Verification failed', error: error.message });
+        console.error('Error in verifyEmailCode:', error);
+        res.status(500).json({ message: 'Gagal memverifikasi kode', error: error.message });
     }
 };
