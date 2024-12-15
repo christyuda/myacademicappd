@@ -92,3 +92,48 @@ exports.createChildMenu = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+exports.getAllMenusWithParent = async (req, res) => {
+    try {
+        const { page = 1, limit = 10 } = req.body; // Default pagination params
+        const offset = (page - 1) * limit;
+
+        const menus = await Menu.findAll({
+            offset: parseInt(offset),
+            limit: parseInt(limit)
+        });
+
+        const structuredMenus = menus.reduce((acc, menu) => {
+            if (!menu.parent_id) {
+                acc[menu.menu_id] = {
+                    ...menu.dataValues,
+                    children: []
+                };
+            } else {
+                const parentMenu = acc[menu.parent_id];
+                if (parentMenu) {
+                    parentMenu.children.push(menu.dataValues);
+                }
+            }
+            return acc;
+        }, {});
+
+        const result = Object.values(structuredMenus);
+
+        // Fetch total count for pagination
+        const totalMenus = await Menu.count();
+        const totalPages = Math.ceil(totalMenus / limit);
+
+        res.status(200).json({
+            data: result,
+            pagination: {
+                currentPage: parseInt(page),
+                totalPages,
+                totalItems: totalMenus
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching menus with parents:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
