@@ -5,16 +5,23 @@ const Users = require('../models/Users'); // Path sesuai dengan lokasi model And
 const { sendEmail } = require('../services/emailService'); 
 
 const SECRET_KEY = process.env.SECRET_KEY;
-
 // Register Function
 exports.register = async (req, res) => {
     try {
         const { email, password, role_id } = req.body;
 
+        // Validasi input wajib
         if (!email || !password) {
             return res.status(400).json({ message: 'Email and password are required' });
         }
 
+        // Validasi duplikat email
+        const existingUser = await Users.findOne({ where: { email } });
+        if (existingUser) {
+            return res.status(400).json({ message: 'Email already exists. Please use another email.' });
+        }
+
+        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Buat pengguna dengan status awal 0
@@ -25,7 +32,17 @@ exports.register = async (req, res) => {
             status: 0 
         });
 
-        res.status(201).json({ message: 'User registered successfully', data: newUser });
+        // Kirim respons sukses
+        res.status(201).json({ 
+            message: 'User registered successfully', 
+            data: {
+                id: newUser.id,
+                email: newUser.email,
+                role_id: newUser.role_id,
+                status: newUser.status,
+                created_at: newUser.createdAt
+            } 
+        });
     } catch (error) {
         // Menangani error validasi Sequelize
         if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
@@ -33,9 +50,11 @@ exports.register = async (req, res) => {
             return res.status(400).json({ message: 'Validation error', errors: messages });
         }
 
+        // Tangani error lain
         res.status(500).json({ message: 'Registration failed', error: error.message });
     }
 };
+
 
 
 // Login Function
@@ -167,6 +186,12 @@ exports.sendVerificationEmail = async (req, res) => {
 
         // Kirim email
         const previewUrl = await sendEmail(email, subject, text, html);
+        const user = await Users.findOne({ where: { email } });
+        if (user) {
+            await user.update({ verificationCode });
+        } else {
+            return res.status(404).json({ message: 'User tidak ditemukan' });
+        }
 
         // Simpan kode ke database atau log (sesuaikan dengan kebutuhan Anda)
         console.log(`Kode verifikasi untuk ${email}: ${verificationCode}`);
@@ -178,7 +203,6 @@ exports.sendVerificationEmail = async (req, res) => {
     }
 };
 
-
 exports.verifyEmailCode = async (req, res) => {
     try {
         const { email, verificationCode } = req.body;
@@ -187,24 +211,24 @@ exports.verifyEmailCode = async (req, res) => {
             return res.status(400).json({ message: 'Email and verification code are required' });
         }
 
-        const user = await Users.findOne({ where: { email } });
+        // Cari user berdasarkan email dan kode verifikasi
+        const user = await Users.findOne({
+            where: { email, verificationCode }
+        });
 
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ message: 'Invalid email or verification code' });
         }
 
-        // Periksa kode verifikasi
-        if (user.verificationCode !== verificationCode) {
-            return res.status(400).json({ message: 'Invalid verification code' });
-        }
-
+        // Perbarui status user
         await user.update({
-            status: 1,
-            verificationCode: null,
+            status: 1, // Set status ke verified
+            verificationCode: null // Hapus kode verifikasi
         });
 
         res.status(200).json({ message: 'User verified successfully' });
     } catch (error) {
+        console.error('Error in verifyEmailCode:', error);
         res.status(500).json({ message: 'Verification failed', error: error.message });
     }
 };

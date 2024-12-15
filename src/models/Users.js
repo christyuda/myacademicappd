@@ -35,6 +35,10 @@ const Users = sequelize.define('User', {
     rememberToken: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    verificationCode: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 }, {
     tableName: 'users',
