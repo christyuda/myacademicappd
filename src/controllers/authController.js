@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const Users = require('../models/Users'); // Path sesuai dengan lokasi model Anda
 const { sendEmail } = require('../services/emailService'); 
+const Tokens = require('../models/Token'); // Path sesuai dengan lokasi model Anda
 
 const SECRET_KEY = process.env.SECRET_KEY;
 // Register Function
@@ -54,39 +55,66 @@ exports.register = async (req, res) => {
         res.status(500).json({ message: 'Registration failed', error: error.message });
     }
 };
-
-
-
-// Login Function
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
+        // Validasi input
         if (!email || !password) {
             return res.status(400).json({ message: 'Email and password are required' });
         }
 
+        // Cari user berdasarkan email
         const user = await Users.findOne({ where: { email } });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
+        // Validasi password
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
             return res.status(401).json({ message: 'Invalid password' });
         }
 
+        // Generate token
         const token = jwt.sign(
-            { id: user.id, email: user.email, role_id: user.role_id },
-            SECRET_KEY,
+            {
+                id: user.id,
+                email: user.email,
+                role_id: user.role_id,
+            },
+            process.env.SECRET_KEY,
             { expiresIn: '1d' }
         );
 
-        res.status(200).json({ message: 'Login successful', token });
+        // Cari atau buat token baru di tabel tokens
+        let tokenRecord = await Tokens.findOne({ where: { user_id: user.id } });
+        if (tokenRecord) {
+            tokenRecord.access_count += 1;
+            tokenRecord.token = token;
+        } else {
+            tokenRecord = await Tokens.create({
+                user_id: user.id,
+                token: token,
+                access_count: 1,
+            });
+        }
+
+        await tokenRecord.save();
+
+        res.status(200).json({
+            message: 'Login successful',
+            data: {
+                token: `${tokenRecord.access_count}|${token}`,
+                role_id: user.role_id,
+            },
+        });
     } catch (error) {
+        console.error('Login error:', error.message);
         res.status(500).json({ message: 'Login failed', error: error.message });
     }
 };
+
 exports.sendVerificationEmail = async (req, res) => {
     try {
         const { email } = req.body;

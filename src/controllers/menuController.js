@@ -1,6 +1,6 @@
 const Menu = require('../models/Menu');
-const Role = require('../models/Role');
-const RoleMenu  = require('../models/RoleMenus');
+const RoleMenu = require('../models/RoleMenus');
+const { getPagination, getPagingData } = require('../utils/paginationHelper');
 
 exports.addMenuToRole = async (req, res) => {
     const { role_id, menu_id, parent_id } = req.body;
@@ -95,19 +95,49 @@ exports.createChildMenu = async (req, res) => {
 
 exports.getAllMenusWithParent = async (req, res) => {
     try {
-        const { page = 1, limit = 10 } = req.body; // Default pagination params
-        const offset = (page - 1) * limit;
+        const { role_id, page = 1, limit = 10 } = req.body;
 
-        const menus = await Menu.findAll({
-            offset: parseInt(offset),
-            limit: parseInt(limit)
+        if (!role_id) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'role_id is required'
+            });
+        }
+
+        // Menggunakan helper untuk mendapatkan limit dan offset
+        const { limit: paginationLimit, offset } = getPagination(page, limit);
+
+        // Ambil data rolemenus berdasarkan role_id
+        const roleMenus = await RoleMenu.findAll({
+            where: { role_id },
+            attributes: ['menu_id'] // Ambil hanya menu_id yang terhubung dengan role_id
         });
 
-        const structuredMenus = menus.reduce((acc, menu) => {
+        if (!roleMenus.length) {
+            return res.status(404).json({
+                status: 'error',
+                message: 'No menus found for this role_id'
+            });
+        }
+
+        // Ambil menu berdasarkan menu_id yang didapat dari rolemenus
+        const menuIds = roleMenus.map(rm => rm.menu_id); // Mengambil menu_id dari rolemenus
+        const menus = await Menu.findAndCountAll({
+            where: {
+                menu_id: menuIds
+            },
+            attributes: ['menu_id', 'parent_id', 'nama_menu', 'routes_page', 'icon', 'sequence'],
+            order: [['sequence', 'ASC']], // Urutkan berdasarkan sequence
+            limit: paginationLimit,
+            offset: offset,
+        });
+
+        // Strukturkan data menjadi parent-child
+        const structuredMenus = menus.rows.reduce((acc, menu) => {
             if (!menu.parent_id) {
                 acc[menu.menu_id] = {
                     ...menu.dataValues,
-                    children: []
+                    children: [],
                 };
             } else {
                 const parentMenu = acc[menu.parent_id];
@@ -120,20 +150,20 @@ exports.getAllMenusWithParent = async (req, res) => {
 
         const result = Object.values(structuredMenus);
 
-        // Fetch total count for pagination
-        const totalMenus = await Menu.count();
-        const totalPages = Math.ceil(totalMenus / limit);
+        // Gunakan helper untuk menambahkan data pagination
 
-        res.status(200).json({
-            data: result,
-            pagination: {
-                currentPage: parseInt(page),
-                totalPages,
-                totalItems: totalMenus
-            }
+        // Return response yang lebih terstruktur sesuai keinginan
+        return res.status(200).json({
+            status: 'success',
+            message: 'Menus fetched successfully',
+            data: result, // Hanya data menu dengan struktur parent-child
+            // pagination // Mengirim pagination dalam format yang benar
         });
     } catch (error) {
         console.error('Error fetching menus with parents:', error);
-        res.status(500).json({ message: error.message });
+        return res.status(500).json({
+            status: 'error',
+            message: error.message
+        });
     }
 };

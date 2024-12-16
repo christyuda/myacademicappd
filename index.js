@@ -23,7 +23,9 @@ const metricRoutes = require('./src/routes/metricRoutes');
 
 const setupSwagger = require('./src/swagger/swaggerSetup');
 
-
+// sequelize.sync({ force: false }).then(() => {
+//     console.log('Database synced successfully!');
+// });
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
