@@ -1,39 +1,42 @@
 const { DataTypes } = require('sequelize');
-const {sequelize} = require('../config/dbConfig'); // Pastikan path ke dbConfig benar
+const { sequelize } = require('../config/dbConfig');
 
 const Role = sequelize.define('Role', {
     id: {
         type: DataTypes.INTEGER,
-        allowNull: false,
         primaryKey: true,
-        autoIncrement: true // asumsi role_id adalah auto increment
+        autoIncrement: true,
+    },
+    role_id: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
     },
     rolename: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
     },
     desc: {
         type: DataTypes.TEXT,
-        allowNull: true
+        allowNull: true,
     },
     status: {
         type: DataTypes.BOOLEAN,
-        defaultValue: true
-    }, 
+        defaultValue: true,
+    },
     created_at: {
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW  // Menggunakan NOW untuk nilai default
+        defaultValue: DataTypes.NOW,
     },
     updated_at: {
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW  // Menggunakan NOW untuk nilai default
-    }
+        defaultValue: DataTypes.NOW,
+    },
 }, {
-    // Opsional: Sequelize options
     tableName: 'roles',
     timestamps: true,
     createdAt: 'created_at',
-    updatedAt: 'updated_at'
+    updatedAt: 'updated_at',
 });
 
 module.exports = Role;

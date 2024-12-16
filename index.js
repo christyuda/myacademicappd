@@ -19,10 +19,13 @@ const kelasRoutes = require('./src/routes/kelasRoutes');
 const mataPelajaranRoutes = require('./src/routes/mapelRoutes');
 const jadwalPelajaranRoutes = require('./src/routes/jadwalPelajaranRoutes');
 const absensiRoutes = require('./module/absensi/routes/absensiRoutes');
+const metricRoutes = require('./src/routes/metricRoutes');
 
 const setupSwagger = require('./src/swagger/swaggerSetup');
 
-
+// sequelize.sync({ force: false }).then(() => {
+//     console.log('Database synced successfully!');
+// });
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -38,6 +41,7 @@ app.use('/api', teacherRoutes);
 app.use('/api', kelasRoutes);
 app.use('/api', mataPelajaranRoutes);
 app.use('/api', jadwalPelajaranRoutes);
+app.use('/api', metricRoutes);
 
 app.use('/api', kehadiranRoutes);
 app.use('/api', absensiRoutes);

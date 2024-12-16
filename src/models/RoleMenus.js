@@ -1,7 +1,13 @@
 const { DataTypes } = require('sequelize');
-const {sequelize} = require('../config/dbConfig');
+const { sequelize } = require('../config/dbConfig');
+const Menu = require('./Menu'); // Pastikan ini diimpor dengan benar
 
 const RoleMenu = sequelize.define('RoleMenu', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+    },
     role_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -18,17 +24,17 @@ const RoleMenu = sequelize.define('RoleMenu', {
         type: DataTypes.INTEGER,
         defaultValue: 1,
     },
-    created_at: { // Gunakan nama kolom yang sesuai dengan tabel di database
+    created_at: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
     },
-    updated_at: { // Gunakan nama kolom yang sesuai dengan tabel di database
+    updated_at: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
     },
 }, {
-    tableName: 'rolemenus', // Sesuaikan dengan nama tabel di database Anda
-    timestamps: false // Matikan pengaturan timestamps default
+    tableName: 'rolemenus',
+    timestamps: false,
 });
 
 module.exports = RoleMenu;
