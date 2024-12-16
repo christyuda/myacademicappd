@@ -5,13 +5,14 @@ const {
     getAllTeachers,
     getTeacherById,
 } = require('../controllers/teacherController'); // Sesuaikan path
+const verifyToken = require('../middleware/authMiddleware');
 
-router.post('/teachers', createTeacherFromUser);
+router.post('/teachers', verifyToken, createTeacherFromUser);
 
 // Route untuk mendapatkan semua teacher (dengan pagination)
-router.get('/teachers', getAllTeachers);
+router.get('/teachers',verifyToken, getAllTeachers);
 
 // Route untuk mendapatkan teacher berdasarkan ID
-router.get('/teachers/:id', getTeacherById);
+router.get('/teachers/:id',verifyToken, getTeacherById);
 
 module.exports = router;

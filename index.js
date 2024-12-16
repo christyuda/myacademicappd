@@ -19,6 +19,7 @@ const kelasRoutes = require('./src/routes/kelasRoutes');
 const mataPelajaranRoutes = require('./src/routes/mapelRoutes');
 const jadwalPelajaranRoutes = require('./src/routes/jadwalPelajaranRoutes');
 const absensiRoutes = require('./module/absensi/routes/absensiRoutes');
+const metricRoutes = require('./src/routes/metricRoutes');
 
 const setupSwagger = require('./src/swagger/swaggerSetup');
 
@@ -38,6 +39,7 @@ app.use('/api', teacherRoutes);
 app.use('/api', kelasRoutes);
 app.use('/api', mataPelajaranRoutes);
 app.use('/api', jadwalPelajaranRoutes);
+app.use('/api', metricRoutes);
 
 app.use('/api', kehadiranRoutes);
 app.use('/api', absensiRoutes);

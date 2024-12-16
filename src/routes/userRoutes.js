@@ -8,17 +8,18 @@ const {
     updateUser, 
     deleteUser 
 } = require('../controllers/userController');
+const verifyToken = require('../middleware/authMiddleware');
 
-router.post('/users', createUser);
+router.post('/users',verifyToken, createUser);
 
-router.post('/users/role', assignRoleToUser);
+router.post('/users/role',verifyToken, assignRoleToUser);
 
-router.get('/users', getAllUsers);
+router.get('/users', verifyToken,getAllUsers);
 
-router.get('/users/:id', getUserById);
+router.get('/users/:id',verifyToken, getUserById);
 
-router.put('/users/:id', updateUser);
+router.put('/users/:id', verifyToken,updateUser);
 
-router.delete('/users/:id', deleteUser);
+router.delete('/users/:id',verifyToken, deleteUser);
 
 module.exports = router;
