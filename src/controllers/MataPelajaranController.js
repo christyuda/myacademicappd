@@ -1,7 +1,6 @@
 const mataPelajaranModel = require('../models/MataPelajaran');
 const { getPagination, getPagingData } = require('../utils/paginationHelper');
 
-// Create a new Mata Pelajaran
 const createMataPelajaran = async (req, res) => {
     const { nama_pelajaran, kode_pelajaran } = req.body;
 
@@ -11,18 +10,38 @@ const createMataPelajaran = async (req, res) => {
             kode_pelajaran,
         });
 
-        res.status(201).json(newMataPelajaran);
+        res.status(201).json({
+            status: true,
+            code: "SUCCESS",
+            message: "Mata Pelajaran created successfully",
+            data: newMataPelajaran,
+            error: null,
+            statusCode: 201,
+        });
     } catch (error) {
         if (error.name === 'SequelizeUniqueConstraintError') {
             // Handle unique constraint error
             return res.status(400).json({
-                error: 'Kode pelajaran already exists. Please use a unique value.',
+                status: false,
+                code: "BAD_REQUEST",
+                message: "Kode pelajaran already exists. Please use a unique value.",
+                data: null,
+                error: error.message,
+                statusCode: 400,
             });
         }
         console.error('Error creating Mata Pelajaran:', error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({
+            status: false,
+            code: "SERVER_ERROR",
+            message: "Failed to create Mata Pelajaran",
+            data: null,
+            error: error.message,
+            statusCode: 500,
+        });
     }
 };
+
 
 
 // Get all Mata Pelajaran with pagination
@@ -62,8 +81,6 @@ const getMataPelajaranById = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
-// Update a Mata Pelajaran
 const updateMataPelajaran = async (req, res) => {
     const { id } = req.params;
     const { nama_pelajaran, kode_pelajaran } = req.body;
@@ -72,7 +89,14 @@ const updateMataPelajaran = async (req, res) => {
         const mataPelajaran = await mataPelajaranModel.findByPk(id);
 
         if (!mataPelajaran) {
-            return res.status(404).json({ message: 'Mata Pelajaran not found' });
+            return res.status(404).json({
+                status: false,
+                code: "NOT_FOUND",
+                message: "Mata Pelajaran not found",
+                data: null,
+                error: null,
+                statusCode: 404,
+            });
         }
 
         await mataPelajaran.update({
@@ -80,10 +104,24 @@ const updateMataPelajaran = async (req, res) => {
             kode_pelajaran,
         });
 
-        res.status(200).json(mataPelajaran);
+        res.status(200).json({
+            status: true,
+            code: "SUCCESS",
+            message: "Mata Pelajaran updated successfully",
+            data: mataPelajaran,
+            error: null,
+            statusCode: 200,
+        });
     } catch (error) {
         console.error('Error updating Mata Pelajaran:', error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({
+            status: false,
+            code: "SERVER_ERROR",
+            message: "Failed to update Mata Pelajaran",
+            data: null,
+            error: error.message,
+            statusCode: 500,
+        });
     }
 };
 
@@ -95,16 +133,36 @@ const deleteMataPelajaran = async (req, res) => {
         const mataPelajaran = await mataPelajaranModel.findByPk(id);
 
         if (!mataPelajaran) {
-            return res.status(404).json({ message: 'Mata Pelajaran not found' });
+            return res.status(404).json({
+                status: false,
+                code: 'NOT_FOUND',
+                message: 'Mata Pelajaran not found',
+                error: null,
+                statusCode: 404
+            });
         }
 
+        // Delete Mata Pelajaran
         await mataPelajaran.destroy();
-        res.status(200).json({ message: 'Mata Pelajaran deleted successfully' });
+        res.status(200).json({
+            status: true,
+            code: 'SUCCESS',
+            message: 'Mata Pelajaran deleted successfully',
+            error: null,
+            statusCode: 200
+        });
     } catch (error) {
         console.error('Error deleting Mata Pelajaran:', error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({
+            status: false,
+            code: 'SERVER_ERROR',
+            message: 'Error occurred while deleting Mata Pelajaran',
+            error: error.message,
+            statusCode: 500
+        });
     }
 };
+
 
 module.exports = {
     createMataPelajaran,

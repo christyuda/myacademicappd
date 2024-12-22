@@ -6,6 +6,7 @@ const createKehadiran = async (req, res) => {
     const { student_id, jadwal_pelajaran_id, semester_tahun_ajaran_id, tanggal, status, keterangan } = req.body;
 
     try {
+        // Buat entri Kehadiran baru
         const newKehadiran = await kehadiranModel.create({
             student_id,
             jadwal_pelajaran_id,
@@ -15,12 +16,32 @@ const createKehadiran = async (req, res) => {
             keterangan,
         });
 
-        res.status(201).json(newKehadiran);
+        // Format respons sesuai permintaan
+        return res.status(201).json({
+            statusCode: 201,
+            message: 'Kehadiran created successfully',
+            data: {
+                id: newKehadiran.id,
+                student_id: newKehadiran.student_id,
+                jadwal_pelajaran_id: newKehadiran.jadwal_pelajaran_id,
+                semester_tahun_ajaran_id: newKehadiran.semester_tahun_ajaran_id,
+                tanggal: newKehadiran.tanggal,
+                status: newKehadiran.status,
+                keterangan: newKehadiran.keterangan,
+                created_at: newKehadiran.created_at,
+                updated_at: newKehadiran.updated_at,
+            },
+        });
     } catch (error) {
         console.error('Error creating Kehadiran:', error);
-        res.status(500).json({ error: error.message });
+        return res.status(500).json({
+            statusCode: 500,
+            message: 'Internal server error',
+            error: error.message,
+        });
     }
 };
+
 
 // Get all Kehadiran with pagination
 const getAllKehadiran = async (req, res) => {
@@ -66,12 +87,18 @@ const updateKehadiran = async (req, res) => {
     const { student_id, jadwal_pelajaran_id, semester_tahun_ajaran_id, tanggal, status, keterangan } = req.body;
 
     try {
+        // Cari kehadiran berdasarkan ID
         const kehadiran = await kehadiranModel.findByPk(id);
 
         if (!kehadiran) {
-            return res.status(404).json({ message: 'Kehadiran not found' });
+            return res.status(404).json({
+                statusCode: 404,
+                message: 'Kehadiran not found',
+                data: null,
+            });
         }
 
+        // Perbarui data kehadiran
         await kehadiran.update({
             student_id,
             jadwal_pelajaran_id,
@@ -81,29 +108,65 @@ const updateKehadiran = async (req, res) => {
             keterangan,
         });
 
-        res.status(200).json(kehadiran);
+        // Format respons sukses
+        return res.status(200).json({
+            statusCode: 200,
+            message: 'Kehadiran updated successfully',
+            data: {
+                id: kehadiran.id,
+                student_id: kehadiran.student_id,
+                jadwal_pelajaran_id: kehadiran.jadwal_pelajaran_id,
+                semester_tahun_ajaran_id: kehadiran.semester_tahun_ajaran_id,
+                tanggal: kehadiran.tanggal,
+                status: kehadiran.status,
+                keterangan: kehadiran.keterangan,
+                created_at: kehadiran.created_at,
+                updated_at: kehadiran.updated_at,
+            },
+        });
     } catch (error) {
         console.error('Error updating Kehadiran:', error);
-        res.status(500).json({ error: error.message });
+        return res.status(500).json({
+            statusCode: 500,
+            message: 'Internal server error',
+            error: error.message,
+        });
     }
 };
+
 
 // Delete a Kehadiran
 const deleteKehadiran = async (req, res) => {
     const { id } = req.params;
 
     try {
+        // Cari kehadiran berdasarkan ID
         const kehadiran = await kehadiranModel.findByPk(id);
 
         if (!kehadiran) {
-            return res.status(404).json({ message: 'Kehadiran not found' });
+            return res.status(404).json({
+                statusCode: 404,
+                message: 'Kehadiran not found',
+                data: null,
+            });
         }
 
+        // Hapus data kehadiran
         await kehadiran.destroy();
-        res.status(200).json({ message: 'Kehadiran deleted successfully' });
+
+        // Format respons sukses
+        return res.status(200).json({
+            statusCode: 200,
+            message: 'Kehadiran deleted successfully',
+            data: null,
+        });
     } catch (error) {
         console.error('Error deleting Kehadiran:', error);
-        res.status(500).json({ error: error.message });
+        return res.status(500).json({
+            statusCode: 500,
+            message: 'Internal server error',
+            error: error.message,
+        });
     }
 };
 
