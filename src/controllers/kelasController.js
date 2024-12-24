@@ -1,6 +1,6 @@
 const kelasModel = require('../models/Kelas');
 const teacherModel = require('../models/Teachers');
-const { getPagination, getPagingData } = require('../utils/paginationHelper'); // Helper for pagination
+const { getPagination, getPagingData } = require('../utils/paginationHelper'); // Helper untuk paginasi
 
 // Create a new Kelas
 const createKelas = async (req, res) => {
@@ -50,7 +50,6 @@ const createKelas = async (req, res) => {
     }
 };
 
-
 // Get all Kelas with pagination
 const getAllKelas = async (req, res) => {
     const { page = 1, size = 10 } = req.query;
@@ -72,10 +71,19 @@ const getAllKelas = async (req, res) => {
         });
 
         const response = getPagingData(data, page, limit, '/api/kelas');
-        res.status(200).json(response);
+
+        return res.status(200).json({
+            statusCode: 200,
+            message: 'Kelas retrieved successfully',
+            ...response, // Gabungkan hasil paginasi dengan data
+        });
     } catch (error) {
         console.error('Error fetching kelas:', error);
-        res.status(500).json({ error: error.message });
+        return res.status(500).json({
+            statusCode: 500,
+            message: 'Internal server error',
+            error: error.message,
+        });
     }
 };
 
@@ -95,13 +103,25 @@ const getKelasById = async (req, res) => {
         });
 
         if (!kelas) {
-            return res.status(404).json({ message: 'Kelas not found' });
+            return res.status(404).json({
+                statusCode: 404,
+                message: 'Kelas not found',
+                data: null,
+            });
         }
 
-        res.status(200).json(kelas);
+        return res.status(200).json({
+            statusCode: 200,
+            message: 'Kelas retrieved successfully',
+            data: kelas,
+        });
     } catch (error) {
         console.error('Error fetching kelas:', error);
-        res.status(500).json({ error: error.message });
+        return res.status(500).json({
+            statusCode: 500,
+            message: 'Internal server error',
+            error: error.message,
+        });
     }
 };
 
@@ -111,12 +131,10 @@ const updateKelas = async (req, res) => {
     const { teacher_id, nama_kelas, tingkat, kapasitas, status } = req.body;
 
     try {
-        // Cari kelas berdasarkan ID
         const kelas = await kelasModel.findByPk(id);
         if (!kelas) {
             return res.status(404).json({
                 statusCode: 404,
-                status: false,
                 message: 'Kelas not found',
                 data: null,
             });
@@ -131,10 +149,8 @@ const updateKelas = async (req, res) => {
             status,
         });
 
-        // Format respons setelah berhasil diupdate
         return res.status(200).json({
             statusCode: 200,
-            status: true,
             message: 'Kelas updated successfully',
             data: {
                 id: kelas.id,
@@ -151,13 +167,11 @@ const updateKelas = async (req, res) => {
         console.error('Error updating kelas:', error);
         return res.status(500).json({
             statusCode: 500,
-            status: false,
             message: 'Internal server error',
             error: error.message,
         });
     }
 };
-
 
 // Delete a Kelas
 const deleteKelas = async (req, res) => {
@@ -166,15 +180,27 @@ const deleteKelas = async (req, res) => {
     try {
         const kelas = await kelasModel.findByPk(id);
         if (!kelas) {
-            return res.status(404).json({ message: 'Kelas not found' });
+            return res.status(404).json({
+                statusCode: 404,
+                message: 'Kelas not found',
+                data: null,
+            });
         }
 
-        // Delete Kelas
         await kelas.destroy();
-        res.status(200).json({ message: 'Kelas deleted successfully' });
+
+        return res.status(200).json({
+            statusCode: 200,
+            message: 'Kelas deleted successfully',
+            data: null,
+        });
     } catch (error) {
         console.error('Error deleting kelas:', error);
-        res.status(500).json({ error: error.message });
+        return res.status(500).json({
+            statusCode: 500,
+            message: 'Internal server error',
+            error: error.message,
+        });
     }
 };
 
