@@ -16,7 +16,7 @@
 
 
 -- Dumping database structure for db_sikad_mysql
-CREATE DATABASE IF NOT EXISTS `db_sikad_mysql` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+CREATE DATABASE IF NOT EXISTS `db_sikad_mysql` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 USE `db_sikad_mysql`;
 
 -- Dumping structure for table db_sikad_mysql.admin_keuangan
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS `admin_keuangan` (
   PRIMARY KEY (`id`),
   KEY `fk_keuangan_admin` (`user_admin_id`),
   CONSTRAINT `fk_keuangan_admin` FOREIGN KEY (`user_admin_id`) REFERENCES `users_admin` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table db_sikad_mysql.admin_keuangan: ~0 rows (approximately)
 
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `admin_keuangan_siswa` (
   PRIMARY KEY (`id`),
   KEY `fk_keuangan_siswa_admin` (`user_admin_id`),
   CONSTRAINT `fk_keuangan_siswa_admin` FOREIGN KEY (`user_admin_id`) REFERENCES `users_admin` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table db_sikad_mysql.admin_keuangan_siswa: ~0 rows (approximately)
 
@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS `admin_landing_pages` (
   PRIMARY KEY (`id`),
   KEY `fk_landing_pages_admin` (`user_admin_id`),
   CONSTRAINT `fk_landing_pages_admin` FOREIGN KEY (`user_admin_id`) REFERENCES `users_admin` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table db_sikad_mysql.admin_landing_pages: ~0 rows (approximately)
 
@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS `jadwal_pelajaran` (
   CONSTRAINT `fk_jadwal_mata_pelajaran` FOREIGN KEY (`mata_pelajaran_id`) REFERENCES `mata_pelajaran` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_jadwal_semester_tahun_ajaran` FOREIGN KEY (`semester_tahun_ajaran_id`) REFERENCES `semester_tahun_ajaran` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_jadwal_teacher` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table db_sikad_mysql.jadwal_pelajaran: ~0 rows (approximately)
 
@@ -123,7 +123,7 @@ CREATE TABLE IF NOT EXISTS `kehadiran` (
   KEY `fk_kehadiran_semester_tahun_ajaran` (`semester_tahun_ajaran_id`),
   CONSTRAINT `fk_kehadiran_semester_tahun_ajaran` FOREIGN KEY (`semester_tahun_ajaran_id`) REFERENCES `semester_tahun_ajaran` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_kehadiran_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table db_sikad_mysql.kehadiran: ~0 rows (approximately)
 
@@ -140,7 +140,7 @@ CREATE TABLE IF NOT EXISTS `kelas` (
   PRIMARY KEY (`id`),
   KEY `fk_kelas_wali_kelas` (`teacher_id`),
   CONSTRAINT `fk_kelas_wali_kelas` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table db_sikad_mysql.kelas: ~0 rows (approximately)
 
@@ -153,7 +153,7 @@ CREATE TABLE IF NOT EXISTS `mata_pelajaran` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `kode_pelajaran` (`kode_pelajaran`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table db_sikad_mysql.mata_pelajaran: ~0 rows (approximately)
 
@@ -172,7 +172,7 @@ CREATE TABLE IF NOT EXISTS `menus` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `parent_id` (`parent_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table db_sikad_mysql.menus: ~1 rows (approximately)
 REPLACE INTO `menus` (`id`, `menu_id`, `parent_id`, `nama_menu`, `routes_page`, `icon`, `sequence`, `status`, `parent_sequence`, `created_at`, `updated_at`) VALUES
@@ -202,7 +202,7 @@ CREATE TABLE IF NOT EXISTS `nilai` (
   CONSTRAINT `fk_nilai_semester_tahun_ajaran` FOREIGN KEY (`semester_tahun_ajaran_id`) REFERENCES `semester_tahun_ajaran` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_nilai_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_nilai_wali_kelas` FOREIGN KEY (`wali_kelas_id`) REFERENCES `wali_kelas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table db_sikad_mysql.nilai: ~0 rows (approximately)
 
@@ -227,7 +227,7 @@ CREATE TABLE IF NOT EXISTS `principals` (
   UNIQUE KEY `nip` (`nip`),
   KEY `fk_principals_users` (`user_id`),
   CONSTRAINT `fk_principals_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table db_sikad_mysql.principals: ~0 rows (approximately)
 
@@ -241,7 +241,7 @@ CREATE TABLE IF NOT EXISTS `rolemenus` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table db_sikad_mysql.rolemenus: ~2 rows (approximately)
 REPLACE INTO `rolemenus` (`id`, `role_id`, `menu_id`, `parent_id`, `status`, `created_at`, `updated_at`) VALUES
@@ -257,7 +257,7 @@ CREATE TABLE IF NOT EXISTS `roles` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table db_sikad_mysql.roles: ~3 rows (approximately)
 REPLACE INTO `roles` (`id`, `rolename`, `desc`, `status`, `created_at`, `updated_at`) VALUES
@@ -275,7 +275,7 @@ CREATE TABLE IF NOT EXISTS `semester_tahun_ajaran` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table db_sikad_mysql.semester_tahun_ajaran: ~0 rows (approximately)
 
@@ -302,7 +302,7 @@ CREATE TABLE IF NOT EXISTS `students` (
   UNIQUE KEY `email` (`email`),
   KEY `fk_students_users` (`user_id`),
   CONSTRAINT `fk_students_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table db_sikad_mysql.students: ~0 rows (approximately)
 
@@ -330,7 +330,7 @@ CREATE TABLE IF NOT EXISTS `teachers` (
   UNIQUE KEY `email` (`email`),
   KEY `fk_teachers_users` (`user_id`),
   CONSTRAINT `fk_teachers_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table db_sikad_mysql.teachers: ~0 rows (approximately)
 
@@ -342,12 +342,12 @@ CREATE TABLE IF NOT EXISTS `users` (
   `email` varchar(255) NOT NULL,
   `emailVerifiedAt` datetime DEFAULT NULL,
   `password` varchar(255) NOT NULL,
-  `rememberToken` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `rememberToken` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table db_sikad_mysql.users: ~1 rows (approximately)
 REPLACE INTO `users` (`id`, `role_id`, `status`, `email`, `emailVerifiedAt`, `password`, `rememberToken`, `created_at`, `updated_at`) VALUES
@@ -366,7 +366,7 @@ CREATE TABLE IF NOT EXISTS `users_admin` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table db_sikad_mysql.users_admin: ~0 rows (approximately)
 
@@ -384,7 +384,7 @@ CREATE TABLE IF NOT EXISTS `wali_kelas` (
   KEY `fk_wali_kelas_kelas` (`kelas_id`),
   CONSTRAINT `fk_wali_kelas_kelas` FOREIGN KEY (`kelas_id`) REFERENCES `kelas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_wali_kelas_teacher` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table db_sikad_mysql.wali_kelas: ~0 rows (approximately)
 
