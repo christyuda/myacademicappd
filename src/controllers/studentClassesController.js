@@ -1,5 +1,6 @@
 const StudentClass = require('../models/student_classes'); // Import model StudentClass
 const Student = require('../models/Students'); // Import model Student
+const Kehadiran = require('../models/Kehadiran'); // Import model Kehadiran
 const Kelas = require('../models/Kelas'); // Import model Kelas
 const { getPagination, getPagingData } = require('../utils/paginationHelper'); // Helper untuk paginasi
 
@@ -56,7 +57,13 @@ const getStudentsByClass = async (req, res) => {
                         'jenis_kelamin',
                         'tempat_lahir',
                         'tanggal_lahir',
-                    ], // Field yang diambil dari model Student
+                    ], 
+                    
+                },
+                {
+                    model: Kehadiran, // Model Kehadiran
+                    as: 'kehadiran', // Alias sesuai dengan relasi di model
+                    attributes: ['status', 'tanggal', 'keterangan'], // Kolom yang diambil
                 },
             ],
         });

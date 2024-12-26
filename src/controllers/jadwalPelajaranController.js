@@ -138,6 +138,117 @@ const getJadwalPelajaranById = async (req, res) => {
     }
 };
 
+// Get Jadwal Pelajaran by User ID
+const getJadwalPelajaranByUser = async (req, res) => {
+    const { page = 1, size = 10 } = req.query; // Ambil parameter paginasi dari query
+    const { limit, offset } = getPagination(page, size); // Gunakan helper untuk paginasi
+
+    try {
+        const { teacher_id } = req.user; // Ambil `teacher_id` dari token login
+
+        if (!teacher_id) {
+            return res.status(403).json({
+                status: false,
+                code: "FORBIDDEN",
+                message: "Teacher ID is missing in the token",
+            });
+        }
+
+        console.log("Teacher ID from token:", teacher_id); // Log untuk memastikan teacher_id
+
+        const query = `
+            SELECT 
+                jp.id, 
+                jp.kelas_id, 
+                k.nama_kelas AS nama_kelas, 
+                jp.mata_pelajaran_id, 
+                mp.nama_pelajaran AS nama_pelajaran, 
+                jp.teacher_id, 
+                t.nama_lengkap AS nama_guru, 
+                jp.semester_tahun_ajaran_id, 
+                sta.tahun_ajaran, 
+                sta.semester, 
+                jp.hari, 
+                jp.jam_mulai, 
+                jp.jam_selesai, 
+                jp.created_at, 
+                jp.updated_at
+            FROM jadwal_pelajaran jp
+            LEFT JOIN kelas k ON jp.kelas_id = k.id
+            LEFT JOIN mata_pelajaran mp ON jp.mata_pelajaran_id = mp.id
+            LEFT JOIN teachers t ON jp.teacher_id = t.id
+            LEFT JOIN semester_tahun_ajaran sta ON jp.semester_tahun_ajaran_id = sta.id
+            WHERE jp.teacher_id = :teacher_id
+            ORDER BY jp.created_at DESC
+            LIMIT :limit OFFSET :offset
+        `;
+
+        console.log("Executing query with teacher_id:", teacher_id); // Log ID yang digunakan dalam query
+
+        const data = await sequelize.query(query, {
+            type: sequelize.QueryTypes.SELECT,
+            replacements: { teacher_id, limit, offset },
+        });
+
+        const totalItemsQuery = `
+            SELECT COUNT(*) AS totalItems
+            FROM jadwal_pelajaran jp
+            WHERE jp.teacher_id = :teacher_id
+        `;
+
+        const totalItemsResult = await sequelize.query(totalItemsQuery, {
+            type: sequelize.QueryTypes.SELECT,
+            replacements: { teacher_id },
+        });
+
+        const totalItems = totalItemsResult[0]?.totalItems || 0;
+
+        const response = {
+            items: data,
+            pagination: {
+                totalItems,
+                currentPage: parseInt(page),
+                perPage: parseInt(size),
+                totalPages: Math.ceil(totalItems / size),
+                urls: {
+                    current: `/api/jadwalPelajaran?page=${page}&size=${size}`,
+                    prev: page > 1 ? `/api/jadwalPelajaran?page=${page - 1}&size=${size}` : null,
+                    next: page < Math.ceil(totalItems / size) ? `/api/jadwalPelajaran?page=${parseInt(page) + 1}&size=${size}` : null,
+                },
+            },
+        };
+
+        if (!data.length) {
+            return res.status(404).json({
+                status: false,
+                code: "NOT_FOUND",
+                message: "No schedule found for the logged-in teacher",
+                data: response,
+            });
+        }
+
+        res.status(200).json({
+            status: true,
+            code: "SUCCESS",
+            message: "Schedule fetched successfully",
+            data: response,
+        });
+    } catch (error) {
+        console.error('Error fetching schedule:', error);
+        res.status(500).json({
+            status: false,
+            code: "ERROR",
+            message: "Internal server error",
+            error: error.message,
+        });
+    }
+};
+
+
+
+
+
+
 // Update a Jadwal Pelajaran
 const updateJadwalPelajaran = async (req, res) => {
     const { id } = req.params;
@@ -249,4 +360,5 @@ module.exports = {
     getJadwalPelajaranById,
     updateJadwalPelajaran,
     deleteJadwalPelajaran,
+    getJadwalPelajaranByUser,
 };

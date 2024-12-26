@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken');
 const Users = require('../models/Users'); // Path sesuai dengan lokasi model Anda
 const { sendEmail } = require('../services/emailService'); 
 const Tokens = require('../models/Token'); // Path sesuai dengan lokasi model Anda
+const Teachers = require('../models/Teachers'); // Path sesuai dengan lokasi model Anda
+const Students = require('../models/Students'); // Path sesuai dengan lokasi model Anda
 
 const SECRET_KEY = process.env.SECRET_KEY;
 // Register Function
@@ -55,6 +57,7 @@ exports.register = async (req, res) => {
         res.status(500).json({ message: 'Registration failed', error: error.message });
     }
 };
+
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -76,16 +79,22 @@ exports.login = async (req, res) => {
             return res.status(401).json({ message: 'Invalid password' });
         }
 
-        // Generate token
-        const token = jwt.sign(
-            {
-                id: user.id,
-                email: user.email,
-                role_id: user.role_id,
-            },
-            process.env.SECRET_KEY,
-            { expiresIn: '1d' }
-        );
+        // Cari role terkait (teacher, student, principal)
+        const teacher = await Teachers.findOne({ where: { user_id: user.id } });
+        const student = await Students.findOne({ where: { user_id: user.id } });
+        // const principal = await Principals.findOne({ where: { user_id: user.id } });
+
+        // Generate token dengan tambahan informasi role_id dan ID terkait
+        const tokenPayload = {
+            id: user.id,
+            email: user.email,
+            role_id: user.role_id,
+            teacher_id: teacher ? teacher.id : 0,
+            student_id: student ? student.id : 0,
+            // principal_id: principal ? principal.id : null,
+        };
+
+        const token = jwt.sign(tokenPayload, process.env.SECRET_KEY, { expiresIn: '1d' });
 
         // Cari atau buat token baru di tabel tokens
         let tokenRecord = await Tokens.findOne({ where: { user_id: user.id } });
@@ -107,6 +116,8 @@ exports.login = async (req, res) => {
             data: {
                 token: `${tokenRecord.access_count}|${token}`,
                 role_id: user.role_id,
+              
+                // principal_id: principal ? principal.id : null,
             },
         });
     } catch (error) {
@@ -114,6 +125,7 @@ exports.login = async (req, res) => {
         res.status(500).json({ message: 'Login failed', error: error.message });
     }
 };
+
 
 exports.sendVerificationEmail = async (req, res) => {
     try {
