@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/dbConfig');
 const Menu = require('./Menu'); // Pastikan ini diimpor dengan benar
-
+const Role = require('./Role'); // Pastikan ini diimpor dengan benar
 const RoleMenu = sequelize.define('RoleMenu', {
     id: {
         type: DataTypes.INTEGER,
@@ -36,5 +36,9 @@ const RoleMenu = sequelize.define('RoleMenu', {
     tableName: 'rolemenus',
     timestamps: false,
 });
+
+RoleMenu.belongsTo(Role, { foreignKey: 'role_id' });
+RoleMenu.belongsTo(Menu, { foreignKey: 'menu_id' });
+
 
 module.exports = RoleMenu;

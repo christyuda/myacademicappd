@@ -10,7 +10,6 @@ const Role = sequelize.define('Role', {
     role_id: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
     },
     rolename: {
         type: DataTypes.STRING,
@@ -21,8 +20,8 @@ const Role = sequelize.define('Role', {
         allowNull: true,
     },
     status: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: true,
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     created_at: {
         type: DataTypes.DATE,

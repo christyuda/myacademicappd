@@ -48,4 +48,6 @@ const JadwalPelajaran = sequelize.define('jadwal_pelajaran', {
     timestamps: false,
 });
 
+
+
 module.exports = JadwalPelajaran;

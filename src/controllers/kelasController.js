@@ -1,6 +1,6 @@
 const kelasModel = require('../models/Kelas');
 const teacherModel = require('../models/Teachers');
-const { getPagination, getPagingData } = require('../utils/paginationHelper'); // Helper for pagination
+const { getPagination, getPagingData } = require('../utils/paginationHelper'); // Helper untuk paginasi
 
 // Create a new Kelas
 const createKelas = async (req, res) => {
@@ -10,7 +10,11 @@ const createKelas = async (req, res) => {
         // Check if the teacher exists
         const teacher = await teacherModel.findByPk(teacher_id);
         if (!teacher) {
-            return res.status(404).json({ message: 'Teacher not found' });
+            return res.status(404).json({
+                statusCode: 404,
+                message: 'Teacher not found',
+                data: null,
+            });
         }
 
         // Create new kelas
@@ -22,10 +26,27 @@ const createKelas = async (req, res) => {
             status,
         });
 
-        res.status(201).json(newKelas);
+        return res.status(201).json({
+            statusCode: 201,
+            message: 'Kelas created successfully',
+            data: {
+                id: newKelas.id,
+                teacher_id: newKelas.teacher_id,
+                nama_kelas: newKelas.nama_kelas,
+                tingkat: newKelas.tingkat,
+                kapasitas: newKelas.kapasitas,
+                status: newKelas.status,
+                created_at: newKelas.created_at,
+                updated_at: newKelas.updated_at,
+            },
+        });
     } catch (error) {
         console.error('Error creating kelas:', error);
-        res.status(500).json({ error: error.message });
+        return res.status(500).json({
+            statusCode: 500,
+            message: 'Internal server error',
+            error: error.message,
+        });
     }
 };
 
@@ -50,10 +71,19 @@ const getAllKelas = async (req, res) => {
         });
 
         const response = getPagingData(data, page, limit, '/api/kelas');
-        res.status(200).json(response);
+
+        return res.status(200).json({
+            statusCode: 200,
+            message: 'Kelas retrieved successfully',
+            ...response, // Gabungkan hasil paginasi dengan data
+        });
     } catch (error) {
         console.error('Error fetching kelas:', error);
-        res.status(500).json({ error: error.message });
+        return res.status(500).json({
+            statusCode: 500,
+            message: 'Internal server error',
+            error: error.message,
+        });
     }
 };
 
@@ -73,13 +103,25 @@ const getKelasById = async (req, res) => {
         });
 
         if (!kelas) {
-            return res.status(404).json({ message: 'Kelas not found' });
+            return res.status(404).json({
+                statusCode: 404,
+                message: 'Kelas not found',
+                data: null,
+            });
         }
 
-        res.status(200).json(kelas);
+        return res.status(200).json({
+            statusCode: 200,
+            message: 'Kelas retrieved successfully',
+            data: kelas,
+        });
     } catch (error) {
         console.error('Error fetching kelas:', error);
-        res.status(500).json({ error: error.message });
+        return res.status(500).json({
+            statusCode: 500,
+            message: 'Internal server error',
+            error: error.message,
+        });
     }
 };
 
@@ -91,10 +133,14 @@ const updateKelas = async (req, res) => {
     try {
         const kelas = await kelasModel.findByPk(id);
         if (!kelas) {
-            return res.status(404).json({ message: 'Kelas not found' });
+            return res.status(404).json({
+                statusCode: 404,
+                message: 'Kelas not found',
+                data: null,
+            });
         }
 
-        // Update Kelas
+        // Update data kelas
         await kelas.update({
             teacher_id,
             nama_kelas,
@@ -103,10 +149,27 @@ const updateKelas = async (req, res) => {
             status,
         });
 
-        res.status(200).json(kelas);
+        return res.status(200).json({
+            statusCode: 200,
+            message: 'Kelas updated successfully',
+            data: {
+                id: kelas.id,
+                teacher_id: kelas.teacher_id,
+                nama_kelas: kelas.nama_kelas,
+                tingkat: kelas.tingkat,
+                kapasitas: kelas.kapasitas,
+                status: kelas.status,
+                created_at: kelas.created_at,
+                updated_at: kelas.updated_at,
+            },
+        });
     } catch (error) {
         console.error('Error updating kelas:', error);
-        res.status(500).json({ error: error.message });
+        return res.status(500).json({
+            statusCode: 500,
+            message: 'Internal server error',
+            error: error.message,
+        });
     }
 };
 
@@ -117,15 +180,27 @@ const deleteKelas = async (req, res) => {
     try {
         const kelas = await kelasModel.findByPk(id);
         if (!kelas) {
-            return res.status(404).json({ message: 'Kelas not found' });
+            return res.status(404).json({
+                statusCode: 404,
+                message: 'Kelas not found',
+                data: null,
+            });
         }
 
-        // Delete Kelas
         await kelas.destroy();
-        res.status(200).json({ message: 'Kelas deleted successfully' });
+
+        return res.status(200).json({
+            statusCode: 200,
+            message: 'Kelas deleted successfully',
+            data: null,
+        });
     } catch (error) {
         console.error('Error deleting kelas:', error);
-        res.status(500).json({ error: error.message });
+        return res.status(500).json({
+            statusCode: 500,
+            message: 'Internal server error',
+            error: error.message,
+        });
     }
 };
 

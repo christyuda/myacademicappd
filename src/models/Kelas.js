@@ -18,7 +18,7 @@ const Kelas = sequelize.define('kelas', {
         allowNull: false,
     },
     tingkat: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false,
     },
     kapasitas: {

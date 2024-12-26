@@ -1,7 +1,7 @@
 // Routes: kelasRoutes.js
 const express = require('express');
 const router = express.Router();
-const { createKelas, getAllKelas, getKelasById,updateKelas,deleteKelas } = require('../controllers/KelasController');
+const { createKelas, getAllKelas, getKelasById,updateKelas,deleteKelas } = require('../controllers/kelasController');
 const verifyToken = require('../middleware/authMiddleware');
 
 router.post('/kelas',verifyToken, createKelas);
