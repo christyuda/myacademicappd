@@ -2,6 +2,7 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/dbConfig');
 const Students = require('./Students'); // Import model Students
 const Kelas = require('./Kelas'); // Import model Kelas
+const Kehadiran = require('./Kehadiran'); // Import model Kehadiran
 
 const StudentClass = sequelize.define('student_classes', {
     id: {
@@ -33,6 +34,7 @@ const StudentClass = sequelize.define('student_classes', {
 });
 
 // Define associations
+StudentClass.hasMany(Kehadiran, { as: 'kehadiran', foreignKey: 'jadwal_pelajaran_id' });
 StudentClass.belongsTo(Students, { foreignKey: 'student_id', as: 'student' });
 Students.hasMany(StudentClass, { foreignKey: 'student_id', as: 'classes' });
 
