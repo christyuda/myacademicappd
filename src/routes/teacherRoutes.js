@@ -4,6 +4,8 @@ const {
     createTeacherFromUser,
     getAllTeachers,
     getTeacherById,
+    updateTeacher,
+    deleteTeacher,
 } = require('../controllers/teacherController'); // Sesuaikan path
 const verifyToken = require('../middleware/authMiddleware');
 
@@ -14,5 +16,10 @@ router.get('/teachers',verifyToken, getAllTeachers);
 
 // Route untuk mendapatkan teacher berdasarkan ID
 router.get('/teachers/:id',verifyToken, getTeacherById);
+// Route untuk mengupdate teacher
+router.put('/teachers/:id', verifyToken, updateTeacher);
+
+// Route untuk menghapus teacher
+router.delete('/teachers/:id', verifyToken, deleteTeacher);
 
 module.exports = router;

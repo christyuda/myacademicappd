@@ -1,6 +1,7 @@
 const userModel = require('../models/Users'); // Import User Model
 const studentModel = require('../models/Students'); // Import Student Model
 const { getPagination, getPagingData } = require('../utils/paginationHelper'); // Import helper
+
 const baseUrl = '/api/students';    
 // Create student from user
 const createStudentFromUser = async (req, res) => {
