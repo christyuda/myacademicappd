@@ -5,7 +5,7 @@ const baseUrl = '/api/students';
 // Create student from user
 const createStudentFromUser = async (req, res) => {
     const {
-        userId,
+        email,
         nis,
         namaLengkap,
         tempatLahir,
@@ -20,12 +20,19 @@ const createStudentFromUser = async (req, res) => {
     } = req.body;
 
     try {
-        // Find user by ID
-        const user = await userModel.findByPk(userId);
+        // Find user by email
+        const user = await userModel.findOne({ where: { email } });
 
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ message: 'User not found with the provided email' });
         }
+
+        // Check if user status is active
+        if (user.status !== true) { 
+            return res.status(400).json({ message: 'User is not active. Cannot generate student.' });
+        }
+
+        const userId = user.id;
 
         // Check if student with the same user_id already exists
         const existingStudent = await studentModel.findOne({ where: { user_id: userId } });
@@ -38,6 +45,7 @@ const createStudentFromUser = async (req, res) => {
         const newStudent = await studentModel.create({
             user_id: userId,
             nis,
+            email,
             nama_lengkap: namaLengkap,
             tempat_lahir: tempatLahir,
             tanggal_lahir: tanggalLahir,
@@ -50,12 +58,33 @@ const createStudentFromUser = async (req, res) => {
             catatan_khusus: catatanKhusus,
         });
 
-        res.status(201).json(newStudent);
+        return res.status(201).json({
+            statusCode: 201,
+            message: 'Student created successfully',
+            data: {
+                id: newStudent.id,
+                user_id: newStudent.user_id,
+                nis: newStudent.nis,
+                nama_lengkap: newStudent.nama_lengkap,
+                tempat_lahir: newStudent.tempat_lahir,
+                tanggal_lahir: newStudent.tanggal_lahir,
+                jenis_kelamin: newStudent.jenis_kelamin,
+                agama: newStudent.agama,
+                alamat: newStudent.alamat,
+                no_telepon: newStudent.no_telepon,
+                tanggal_masuk: newStudent.tanggal_masuk,
+                status: newStudent.status,
+                catatan_khusus: newStudent.catatan_khusus,
+                created_at: newStudent.created_at,
+                updated_at: newStudent.updated_at,
+            },
+        });
     } catch (error) {
         console.error('Error creating student:', error);
         res.status(500).json({ error: error.message });
     }
 };
+
 
 // Get all students
 const getAllStudents = async (req, res) => {
