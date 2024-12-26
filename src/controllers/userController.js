@@ -1,9 +1,10 @@
 const userModel = require ('../models/Users');
+const { getPagination, getPagingData, buildConditions } = require('../utils/paginationHelper');
 
 
 
 const createUser = async (req, res) => {
-    const { name, email, password, status = true, role_id = 0 } = req.body; // Default role_id to 0 if not provided
+    const { name, email, password, status = true, role_id = 0 } = req.body; 
 
     try {
         const newUser = await userModel.create({
@@ -45,9 +46,22 @@ const assignRoleToUser = async (req, res) => {
 };
 // Controller to handle fetching all users
 const getAllUsers = async (req, res) => {
+    const { page, size, term, startDate, endDate, sortField = 'id', sortOrder = 'ASC' } = req.query;
+    const baseUrl = `${req.protocol}://${req.get('host')}${req.originalUrl.split('?')[0]}`;
+
+    const { limit, offset } = getPagination(page, size);
+    const conditions = buildConditions({ startDate, endDate, term });
+
     try {
-        const users = await userModel.findAll();
-        res.status(200).json(users);
+        const users = await userModel.findAndCountAll({
+            where: conditions,
+            limit,
+            offset,
+            order: [[sortField, sortOrder.toUpperCase()]],
+        });
+
+        const response = getPagingData(users, page, limit, baseUrl);
+        res.status(200).json(response);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

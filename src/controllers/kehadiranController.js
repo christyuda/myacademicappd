@@ -1,5 +1,6 @@
 const kehadiranModel = require('../models/Kehadiran');
 const { getPagination, getPagingData } = require('../utils/paginationHelper');
+const { sequelize } = require('../config/dbConfig');
 
 // Create a new Kehadiran
 const createKehadiran = async (req, res) => {
@@ -49,17 +50,76 @@ const getAllKehadiran = async (req, res) => {
     const { limit, offset } = getPagination(page, size);
 
     try {
-        const data = await kehadiranModel.findAndCountAll({
-            limit,
-            offset,
-            order: [['tanggal', 'DESC']],
+        // Query manual untuk join data
+        const query = `
+            SELECT 
+            k.id AS id,
+            s.nama_lengkap AS nama_siswa,
+            mp.nama_pelajaran AS nama_pelajaran, 
+            kls.nama_kelas AS nama_kelas,
+            CONCAT(sta.tahun_ajaran, ' - Semester ', sta.semester) AS nama_semester,
+            jp.hari,
+            jp.jam_mulai,
+            jp.jam_selesai,
+            k.tanggal,
+            k.status,
+            k.keterangan,
+            k.created_at,
+            k.updated_at
+        FROM kehadiran k
+        LEFT JOIN students s ON k.student_id = s.id -- Menghubungkan ke tabel students
+        LEFT JOIN jadwal_pelajaran jp ON k.jadwal_pelajaran_id = jp.id -- Menghubungkan ke tabel jadwal_pelajaran
+        LEFT JOIN kelas kls ON jp.kelas_id = kls.id -- Menghubungkan ke tabel kelas
+        LEFT JOIN mata_pelajaran mp ON jp.mata_pelajaran_id = mp.id -- Menghubungkan ke tabel mata_pelajaran
+        LEFT JOIN semester_tahun_ajaran sta ON jp.semester_tahun_ajaran_id = sta.id -- Menghubungkan ke tabel semester_tahun_ajaran
+        ORDER BY k.created_at DESC
+        LIMIT :limit OFFSET :offset;
+
+
+
+        `;
+
+        const data = await sequelize.query(query, {
+            type: sequelize.QueryTypes.SELECT,
+            replacements: { limit, offset },
         });
 
-        const response = getPagingData(data, page, limit, '/api/kehadiran');
-        res.status(200).json(response);
+        // Hitung total data
+        const totalItems = await sequelize.query(
+            `SELECT COUNT(*) AS count FROM kehadiran`,
+            { type: sequelize.QueryTypes.SELECT }
+        );
+
+        // Format respons
+        const response = {
+            items: data,
+            pagination: {
+                totalItems: totalItems[0].count,
+                currentPage: parseInt(page),
+                perPage: parseInt(size),
+                totalPages: Math.ceil(totalItems[0].count / size),
+                urls: {
+                    current: `/api/kehadiran?page=${page}&size=${size}`,
+                    prev: page > 1 ? `/api/kehadiran?page=${page - 1}&size=${size}` : null,
+                    next: page < Math.ceil(totalItems[0].count / size) ? `/api/kehadiran?page=${parseInt(page) + 1}&size=${size}` : null,
+                },
+            },
+        };
+
+        res.status(200).json({
+            status: true,
+            code: 'SUCCESS',
+            message: 'Kehadiran fetched successfully',
+            data: response,
+        });
     } catch (error) {
         console.error('Error fetching Kehadiran:', error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({
+            status: false,
+            code: 'ERROR',
+            message: 'Internal server error',
+            error: error.message,
+        });
     }
 };
 

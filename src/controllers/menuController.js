@@ -100,7 +100,7 @@ exports.getAllMenusWithParent = async (req, res) => {
         if (!role_id) {
             return res.status(400).json({
                 status: 'error',
-                message: 'role_id is required'
+                message: 'role_id is required',
             });
         }
 
@@ -110,60 +110,68 @@ exports.getAllMenusWithParent = async (req, res) => {
         // Ambil data rolemenus berdasarkan role_id
         const roleMenus = await RoleMenu.findAll({
             where: { role_id },
-            attributes: ['menu_id'] // Ambil hanya menu_id yang terhubung dengan role_id
+            attributes: ['menu_id'], // Ambil hanya menu_id yang terhubung dengan role_id
         });
 
         if (!roleMenus.length) {
             return res.status(404).json({
                 status: 'error',
-                message: 'No menus found for this role_id'
+                message: 'No menus found for this role_id',
             });
         }
 
         // Ambil menu berdasarkan menu_id yang didapat dari rolemenus
-        const menuIds = roleMenus.map(rm => rm.menu_id); // Mengambil menu_id dari rolemenus
-        const menus = await Menu.findAndCountAll({
+        const menuIds = roleMenus.map((rm) => rm.menu_id); // Mengambil menu_id dari rolemenus
+        const menus = await Menu.findAll({
             where: {
-                menu_id: menuIds
+                menu_id: menuIds,
             },
             attributes: ['menu_id', 'parent_id', 'nama_menu', 'routes_page', 'icon', 'sequence'],
             order: [['sequence', 'ASC']], // Urutkan berdasarkan sequence
-            limit: paginationLimit,
-            offset: offset,
         });
 
         // Strukturkan data menjadi parent-child
-        const structuredMenus = menus.rows.reduce((acc, menu) => {
-            if (!menu.parent_id) {
-                acc[menu.menu_id] = {
+        const buildHierarchy = (menus, parentId = 0) => {
+            return menus
+                .filter((menu) => menu.parent_id === parentId)
+                .map((menu) => ({
                     ...menu.dataValues,
-                    children: [],
-                };
-            } else {
-                const parentMenu = acc[menu.parent_id];
-                if (parentMenu) {
-                    parentMenu.children.push(menu.dataValues);
-                }
-            }
-            return acc;
-        }, {});
+                    children: buildHierarchy(menus, menu.menu_id), // Rekursif untuk mendapatkan children
+                }));
+        };
 
-        const result = Object.values(structuredMenus);
+        const structuredMenus = buildHierarchy(menus);
 
-        // Gunakan helper untuk menambahkan data pagination
+        // Ambil data total untuk pagination
+        const totalItems = await Menu.count({
+            where: { menu_id: menuIds },
+        });
 
-        // Return response yang lebih terstruktur sesuai keinginan
+        // Format pagination
+        const pagination = {
+            totalItems,
+            currentPage: parseInt(page),
+            perPage: parseInt(limit),
+            totalPages: Math.ceil(totalItems / limit),
+            urls: {
+                current: `/api/menus?page=${page}&limit=${limit}`,
+                prev: page > 1 ? `/api/menus?page=${page - 1}&limit=${limit}` : null,
+                next: page < Math.ceil(totalItems / limit) ? `/api/menus?page=${parseInt(page) + 1}&limit=${limit}` : null,
+            },
+        };
+
+        // Return response yang lebih terstruktur
         return res.status(200).json({
             status: 'success',
             message: 'Menus fetched successfully',
-            data: result, // Hanya data menu dengan struktur parent-child
-            // pagination // Mengirim pagination dalam format yang benar
+            data: structuredMenus,
+            pagination,
         });
     } catch (error) {
         console.error('Error fetching menus with parents:', error);
         return res.status(500).json({
             status: 'error',
-            message: error.message
+            message: error.message,
         });
     }
 };
