@@ -230,10 +230,81 @@ const deleteKehadiran = async (req, res) => {
     }
 };
 
+const createOrUpdateKehadiran = async (req, res) => {
+    const { student_id, jadwal_pelajaran_id, semester_tahun_ajaran_id, tanggal, status, keterangan } = req.body;
+
+    try {
+        // Validasi apakah student_id ada di tabel students
+        const studentExists = await sequelize.query(
+            'SELECT id FROM students WHERE id = :student_id',
+            {
+                type: sequelize.QueryTypes.SELECT,
+                replacements: { student_id },
+            }
+        );
+
+        if (studentExists.length === 0) {
+            return res.status(400).json({
+                statusCode: 400,
+                message: `Student with id ${student_id} does not exist.`,
+            });
+        }
+
+        // Periksa apakah data kehadiran sudah ada
+        const existingKehadiran = await kehadiranModel.findOne({
+            where: {
+                student_id,
+                jadwal_pelajaran_id,
+                semester_tahun_ajaran_id,
+                tanggal,
+            },
+        });
+
+        if (existingKehadiran) {
+            // Jika sudah ada, update data
+            await existingKehadiran.update({
+                status,
+                keterangan,
+            });
+
+            return res.status(200).json({
+                statusCode: 200,
+                message: 'Kehadiran updated successfully',
+                data: existingKehadiran,
+            });
+        } else {
+            // Jika belum ada, buat data baru
+            const newKehadiran = await kehadiranModel.create({
+                student_id,
+                jadwal_pelajaran_id,
+                semester_tahun_ajaran_id,
+                tanggal,
+                status,
+                keterangan,
+            });
+
+            return res.status(201).json({
+                statusCode: 201,
+                message: 'Kehadiran created successfully',
+                data: newKehadiran,
+            });
+        }
+    } catch (error) {
+        console.error('Error handling Kehadiran:', error);
+        return res.status(500).json({
+            statusCode: 500,
+            message: 'Internal server error',
+            error: error.message,
+        });
+    }
+};
+
+
 module.exports = {
     createKehadiran,
     getAllKehadiran,
     getKehadiranById,
     updateKehadiran,
     deleteKehadiran,
+    createOrUpdateKehadiran
 };
