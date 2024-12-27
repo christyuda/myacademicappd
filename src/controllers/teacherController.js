@@ -89,7 +89,7 @@ const createTeacherFromUser = async (req, res) => {
     }
 };
 
-// Get all teachers
+// Get all teachers with pagination
 const getAllTeachers = async (req, res) => {
     const { page = 1, size = 10 } = req.query; // Ambil parameter `page` dan `size` dari query string
     const { limit, offset } = getPagination(page, size); // Gunakan helper untuk limit dan offset
@@ -116,24 +116,32 @@ const getAllTeachers = async (req, res) => {
         // Jika tidak ada data, beri respons kosong
         if (response.items.length === 0) {
             return res.status(200).json({
-                message: 'No teachers found',
-                pagination: response.pagination,
-                items: [],
+                message: 'No teachers found', // Menyampaikan bahwa tidak ada guru yang ditemukan
+                pagination: response.pagination, // Menyertakan info pagination meskipun tidak ada data
+                items: [], // Mengembalikan array kosong jika tidak ada guru
             });
         }
 
         // Beri respons data yang ditemukan
-        res.status(200).json(response);
+        res.status(200).json({
+            message: 'Teachers retrieved successfully', // Pesan sukses
+            pagination: response.pagination, // Info pagination (current page, total pages, etc.)
+            items: response.items, // Data guru yang ditemukan
+        });
     } catch (error) {
         console.error('Error fetching teachers with pagination:', error);
 
         // Respons error lebih deskriptif
         res.status(500).json({
-            error: 'An error occurred while fetching teachers',
-            details: error.message,
+            message: 'An error occurred while fetching teachers', // Pesan umum untuk error
+            error: {
+                details: error.message, // Menyertakan rincian error untuk debugging
+                stack: error.stack, // Menyertakan stack trace untuk pelacakan error lebih lanjut
+            },
         });
     }
 };
+
 
 const getTeacherById = async (req, res) => {
     const { id } = req.params;

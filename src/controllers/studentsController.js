@@ -84,32 +84,89 @@ const createStudentFromUser = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
-// Get all students
 const getAllStudents = async (req, res) => {
     const { page = 1, size = 10 } = req.query; // Ambil parameter `page` dan `size` dari query string
-    const { limit, offset } = getPagination(page, size);
+    const { limit, offset } = getPagination(page, size); // Gunakan helper untuk limit dan offset
+    const baseUrl = '/api/students'; // Base URL untuk pagination links
 
     try {
+        // Fetch data siswa dengan pagination dan include relasi users untuk email
         const data = await studentModel.findAndCountAll({
             limit,
             offset,
             include: [
                 {
                     model: userModel,
-                    as: 'user', // Alias yang sesuai dengan relasi
-                    attributes: ['email'], // Ambil atribut tertentu dari tabel users
+                    as: 'user', // Alias yang sesuai dengan relasi di model
+                    attributes: ['email'], // Ambil hanya atribut email dari relasi
                 },
             ],
+            order: [['created_at', 'DESC']], // Default order berdasarkan created_at
         });
 
-        // Format data menggunakan helper
+        // Format data untuk pagination
         const response = getPagingData(data, page, limit, baseUrl);
 
-        res.status(200).json(response);
+        // Menghitung Periode berdasarkan data siswa yang ditemukan
+        let startDate = null;
+        let endDate = null;
+
+        // Untuk menghitung siswa per bulan
+        const studentsPerMonth = new Array(12).fill(0);
+
+        response.items.forEach(student => {
+            const month = new Date(student.tanggal_masuk).getMonth(); // Mendapatkan bulan dari tanggal masuk
+            studentsPerMonth[month] += 1;
+
+            // Tentukan start date dan end date berdasarkan tanggal_masuk
+            const studentDate = new Date(student.tanggal_masuk); // Convert to Date object
+            if (!startDate || studentDate < startDate) {
+                startDate = studentDate;
+            }
+            if (!endDate || studentDate > endDate) {
+                endDate = studentDate;
+            }
+        });
+
+        // Tentukan periode berdasarkan start dan end date
+        let period = 'No data for period';
+        if (startDate && endDate) {
+            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            period = `${months[startDate.getMonth()]} - ${months[endDate.getMonth()]} ${endDate.getFullYear()}`;
+        }
+
+        // Jika tidak ada data siswa, beri respons kosong
+        if (response.items.length === 0) {
+            return res.status(200).json({
+                message: 'No students found',
+                pagination: response.pagination,
+                items: [],
+                metrics: {
+                    period: 'January - December 2024', // Default period if no students are found
+                },
+            });
+        }
+
+        // Berikan respons data yang ditemukan dengan tambahan metrics
+        res.status(200).json({
+            message: 'Students retrieved successfully',
+            pagination: response.pagination,
+            items: response.items,
+            metrics: {
+                period: period, // Add the calculated period
+            },
+        });
     } catch (error) {
         console.error('Error fetching students with pagination:', error);
-        res.status(500).json({ error: error.message });
+
+        // Respons error dengan lebih jelas
+        res.status(500).json({
+            message: 'An error occurred while fetching students',
+            error: {
+                details: error.message,
+                stack: error.stack, // Bisa menambahkan stack trace untuk debugging
+            },
+        });
     }
 };
 

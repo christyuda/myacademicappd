@@ -83,7 +83,21 @@ exports.login = async (req, res) => {
         const teacher = await Teachers.findOne({ where: { user_id: user.id } });
         const student = await Students.findOne({ where: { user_id: user.id } });
         // const principal = await Principals.findOne({ where: { user_id: user.id } });
-
+        let login_as;
+        switch (user.role_id) {
+            case 998:
+                login_as = "Super Admin";
+                break;
+            case 2:
+                login_as = "Guru";
+                break;
+            case 3:
+                login_as = "Kepala Sekolah";
+                break;
+            default:
+                login_as = "unknown";
+                break;
+        }
         // Generate token dengan tambahan informasi role_id dan ID terkait
         const tokenPayload = {
             id: user.id,
@@ -116,6 +130,10 @@ exports.login = async (req, res) => {
             data: {
                 token: `${tokenRecord.access_count}|${token}`,
                 role_id: user.role_id,
+                email: user.email,
+                login_as: login_as,
+
+                
               
                 // principal_id: principal ? principal.id : null,
             },
