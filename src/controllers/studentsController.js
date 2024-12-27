@@ -1,6 +1,7 @@
 const userModel = require('../models/Users'); // Import User Model
 const studentModel = require('../models/Students'); // Import Student Model
 const { getPagination, getPagingData } = require('../utils/paginationHelper'); // Import helper
+
 const baseUrl = '/api/students';    
 // Create student from user
 const createStudentFromUser = async (req, res) => {
@@ -25,6 +26,13 @@ const createStudentFromUser = async (req, res) => {
 
         if (!user) {
             return res.status(404).json({ message: 'User not found with the provided email' });
+        }
+
+        // Check if user status is active
+        if (user.status !== true) { 
+            return res.status(400).json({ message: 'User is not active. Cannot generate student.' });
+        }
+
         }
 
         // Check if user status is active
@@ -84,6 +92,7 @@ const createStudentFromUser = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 const getAllStudents = async (req, res) => {
     const { page = 1, size = 10 } = req.query; // Ambil parameter `page` dan `size` dari query string
     const { limit, offset } = getPagination(page, size); // Gunakan helper untuk limit dan offset
