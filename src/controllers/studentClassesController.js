@@ -3,6 +3,7 @@ const Student = require('../models/Students'); // Import model Student
 const Kehadiran = require('../models/Kehadiran'); // Import model Kehadiran
 const Kelas = require('../models/Kelas'); // Import model Kelas
 const { getPagination, getPagingData } = require('../utils/paginationHelper'); // Helper untuk paginasi
+const { sequelize } = require('../config/dbConfig'); // Import instance Sequelize
 
 
 // Create a new student-class association
@@ -64,6 +65,7 @@ const getStudentsByClass = async (req, res) => {
                     model: Kehadiran, // Model Kehadiran
                     as: 'kehadiran', // Alias sesuai dengan relasi di model
                     attributes: ['status', 'tanggal', 'keterangan'], // Kolom yang diambil
+                    required: false,
                 },
             ],
         });
@@ -71,6 +73,7 @@ const getStudentsByClass = async (req, res) => {
         if (studentsInClass.rows.length === 0) {
             return res.status(404).json({ message: 'No students found in this class' });
         }
+        
 
         const response = getPagingData(
             studentsInClass,
@@ -202,11 +205,142 @@ const bulkCreateStudentInClass = async (req, res) => {
     }
 };
 
+const getStudentsByTeachers = async (req, res) => {
+    const { kelas_id, jadwal_pelajaran_id } = req.params; // Mengambil kelas_id dan jadwal_pelajaran_id dari parameter route
+    const { page = 1, size = 10 } = req.query;
+    const { limit, offset } = getPagination(page, size);
+
+    try {
+        if (!jadwal_pelajaran_id) {
+            return res.status(400).json({
+                status: false,
+                message: 'jadwal_pelajaran_id is required',
+            });
+        }
+
+        // Query untuk mendapatkan data students dan kehadiran
+        const query = `
+            SELECT 
+                sc.id AS student_class_id,
+                sc.student_id,
+                sc.kelas_id,
+                sc.created_at AS student_class_created_at,
+                sc.updated_at AS student_class_updated_at,
+                s.id AS student_id,
+                s.nama_lengkap,
+                s.nis,
+                s.jenis_kelamin,
+                s.tempat_lahir,
+                s.tanggal_lahir,
+                k.status AS kehadiran_status,
+                k.tanggal AS kehadiran_tanggal,
+                k.keterangan AS kehadiran_keterangan
+            FROM student_classes sc
+            LEFT JOIN students s ON sc.student_id = s.id
+            LEFT JOIN kehadiran k ON sc.student_id = k.student_id AND k.jadwal_pelajaran_id = :jadwal_pelajaran_id
+            WHERE sc.kelas_id = :kelas_id
+            ORDER BY sc.id ASC
+            LIMIT :limit OFFSET :offset;
+        `;
+
+        // Eksekusi query
+        const students = await sequelize.query(query, {
+            type: sequelize.QueryTypes.SELECT,
+            replacements: { kelas_id, jadwal_pelajaran_id, limit, offset },
+        });
+
+        // Query untuk menghitung total items
+        const countQuery = `
+            SELECT COUNT(*) AS totalItems
+            FROM student_classes sc
+            WHERE sc.kelas_id = :kelas_id;
+        `;
+
+        const totalItemsResult = await sequelize.query(countQuery, {
+            type: sequelize.QueryTypes.SELECT,
+            replacements: { kelas_id },
+        });
+
+        const totalItems = totalItemsResult[0]?.totalItems || 0;
+
+        // Proses data untuk format JSON yang diinginkan
+        const studentsMap = {};
+
+        students.forEach((row) => {
+            if (!studentsMap[row.student_class_id]) {
+                studentsMap[row.student_class_id] = {
+                    id: row.student_class_id,
+                    student_id: row.student_id,
+                    kelas_id: row.kelas_id,
+                    created_at: row.student_class_created_at,
+                    updated_at: row.student_class_updated_at,
+                    student: {
+                        id: row.student_id,
+                        nama_lengkap: row.nama_lengkap,
+                        nis: row.nis,
+                        jenis_kelamin: row.jenis_kelamin,
+                        tempat_lahir: row.tempat_lahir,
+                        tanggal_lahir: row.tanggal_lahir,
+                    },
+                    kehadiran: [],
+                };
+            }
+
+            if (row.kehadiran_status) {
+                studentsMap[row.student_class_id].kehadiran.push({
+                    status: row.kehadiran_status,
+                    tanggal: row.kehadiran_tanggal,
+                    keterangan: row.kehadiran_keterangan,
+                });
+            }
+        });
+
+        const formattedStudents = Object.values(studentsMap);
+
+        // Format respons
+        const response = {
+            items: formattedStudents,
+            pagination: {
+                totalItems,
+                currentPage: parseInt(page),
+                perPage: parseInt(size),
+                totalPages: Math.ceil(totalItems / size),
+                urls: {
+                    current: `/api/student-classes/${kelas_id}?page=${page}&size=${size}&jadwal_pelajaran_id=${jadwal_pelajaran_id}`,
+                    prev: page > 1 ? `/api/student-classes/${kelas_id}?page=${page - 1}&size=${size}&jadwal_pelajaran_id=${jadwal_pelajaran_id}` : null,
+                    next: page < Math.ceil(totalItems / size) ? `/api/student-classes/${kelas_id}?page=${parseInt(page) + 1}&size=${size}&jadwal_pelajaran_id=${jadwal_pelajaran_id}` : null,
+                },
+            },
+        };
+
+        if (formattedStudents.length === 0) {
+            return res.status(404).json({
+                status: false,
+                message: 'No students found in this class',
+                data: response,
+            });
+        }
+
+        return res.status(200).json({
+            status: true,
+            message: 'Students in class retrieved successfully',
+            data: response,
+        });
+    } catch (error) {
+        console.error('Error fetching students by class:', error);
+        return res.status(500).json({
+            status: false,
+            message: 'Internal server error',
+            error: error.message,
+        });
+    }
+};
 
 module.exports = {
     createStudentClass,
     getStudentsByClass,
     removeStudentFromClass,
     updateStudentClass,
-    bulkCreateStudentInClass
+    bulkCreateStudentInClass,
+    getStudentsByTeachers
 };

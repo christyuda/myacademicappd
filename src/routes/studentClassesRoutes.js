@@ -8,5 +8,6 @@ router.post('/student-classes/bulk',verifyToken, studentClassController.bulkCrea
 router.get('/student-classes/:kelas_id',verifyToken, studentClassController.getStudentsByClass); // Read
 router.put('/student-classes/:id',verifyToken, studentClassController.updateStudentClass); // Update
 router.delete('/student-classes/:id', verifyToken, studentClassController.removeStudentFromClass); // Delete
+router.get('/student-classes-teachers/:kelas_id/schedules/:jadwal_pelajaran_id', studentClassController.getStudentsByTeachers);
 
 module.exports = router;

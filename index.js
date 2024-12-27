@@ -21,7 +21,7 @@ const jadwalPelajaranRoutes = require('./src/routes/jadwalPelajaranRoutes');
 const absensiRoutes = require('./module/absensi/routes/absensiRoutes');
 const metricRoutes = require('./src/routes/metricRoutes');
 const studentClassesRoutes = require('./src/routes/studentClassesRoutes');
-
+const schoolAnnouncement = require('./src/routes/SchoolAnnouncementsRoutes');
 const setupSwagger = require('./src/swagger/swaggerSetup');
 
 // sequelize.sync({ force: false }).then(() => {
@@ -44,6 +44,7 @@ app.use('/api', mataPelajaranRoutes);
 app.use('/api', jadwalPelajaranRoutes);
 app.use('/api', metricRoutes);
 app.use('/api', studentClassesRoutes);
+app.use('/api', schoolAnnouncement);
 
 
 app.use('/api', kehadiranRoutes);
