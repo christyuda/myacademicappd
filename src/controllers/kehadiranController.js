@@ -270,7 +270,17 @@ const createOrUpdateKehadiran = async (req, res) => {
             return res.status(200).json({
                 statusCode: 200,
                 message: 'Kehadiran updated successfully',
-                data: existingKehadiran,
+                data: {
+                    id: existingKehadiran.id,
+                    student_id: existingKehadiran.student_id,
+                    jadwal_pelajaran_id: existingKehadiran.jadwal_pelajaran_id,
+                    semester_tahun_ajaran_id: existingKehadiran.semester_tahun_ajaran_id,
+                    tanggal: existingKehadiran.tanggal,
+                    status: existingKehadiran.status,
+                    keterangan: existingKehadiran.keterangan,
+                    created_at: existingKehadiran.created_at,
+                    updated_at: existingKehadiran.updated_at,
+                },
             });
         } else {
             // Jika belum ada, buat data baru
@@ -286,7 +296,17 @@ const createOrUpdateKehadiran = async (req, res) => {
             return res.status(201).json({
                 statusCode: 201,
                 message: 'Kehadiran created successfully',
-                data: newKehadiran,
+                data: {
+                    id: newKehadiran.id,
+                    student_id: newKehadiran.student_id,
+                    jadwal_pelajaran_id: newKehadiran.jadwal_pelajaran_id,
+                    semester_tahun_ajaran_id: newKehadiran.semester_tahun_ajaran_id,
+                    tanggal: newKehadiran.tanggal,
+                    status: newKehadiran.status,
+                    keterangan: newKehadiran.keterangan,
+                    created_at: newKehadiran.created_at,
+                    updated_at: newKehadiran.updated_at,
+                },
             });
         }
     } catch (error) {
@@ -298,6 +318,7 @@ const createOrUpdateKehadiran = async (req, res) => {
         });
     }
 };
+
 
 
 module.exports = {
