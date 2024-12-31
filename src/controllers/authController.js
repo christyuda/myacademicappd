@@ -15,13 +15,23 @@ exports.register = async (req, res) => {
 
         // Validasi input wajib
         if (!email || !password) {
-            return res.status(400).json({ message: 'Email and password are required' });
+            return res.status(400).json({
+                status: 'error',
+                code: 400,
+                message: 'Email and password are required',
+                data: null
+            });
         }
 
         // Validasi duplikat email
         const existingUser = await Users.findOne({ where: { email } });
         if (existingUser) {
-            return res.status(400).json({ message: 'Email already exists. Please use another email.' });
+            return res.status(400).json({
+                status: 'error',
+                code: 400,
+                message: 'Email already exists. Please use another email.',
+                data: null
+            });
         }
 
         // Hash password
@@ -32,31 +42,46 @@ exports.register = async (req, res) => {
             email,
             password: hashedPassword,
             role_id,
-            status: 0 
+            status: 0
         });
 
         // Kirim respons sukses
-        res.status(201).json({ 
-            message: 'User registered successfully', 
+        res.status(201).json({
+            status: 'success',
+            code: 201,
+            message: 'User registered successfully',
             data: {
                 id: newUser.id,
                 email: newUser.email,
                 role_id: newUser.role_id,
                 status: newUser.status,
                 created_at: newUser.createdAt
-            } 
+            }
         });
     } catch (error) {
         // Menangani error validasi Sequelize
         if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
             const messages = error.errors.map(err => err.message);
-            return res.status(400).json({ message: 'Validation error', errors: messages });
+            return res.status(400).json({
+                status: 'error',
+                code: 400,
+                message: 'Validation error',
+                errors: messages,
+                data: null
+            });
         }
 
         // Tangani error lain
-        res.status(500).json({ message: 'Registration failed', error: error.message });
+        res.status(500).json({
+            status: 'error',
+            code: 500,
+            message: 'Registration failed',
+            error: error.message,
+            data: null
+        });
     }
 };
+
 
 exports.login = async (req, res) => {
     try {

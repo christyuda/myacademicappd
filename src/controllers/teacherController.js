@@ -61,6 +61,9 @@ const createTeacherFromUser = async (req, res) => {
             is_wali_kelas: isWaliKelas,
         });
 
+        // Update user's role_id to 2
+        await userModel.update({ role_id: 2 }, { where: { id: userId } });
+
         return res.status(201).json({
             statusCode: 201,
             message: 'Teacher created successfully',
@@ -88,6 +91,7 @@ const createTeacherFromUser = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 
 // Get all teachers with pagination
 const getAllTeachers = async (req, res) => {
@@ -134,6 +138,62 @@ const getAllTeachers = async (req, res) => {
         // Respons error lebih deskriptif
         res.status(500).json({
             message: 'An error occurred while fetching teachers', // Pesan umum untuk error
+            error: {
+                details: error.message, // Menyertakan rincian error untuk debugging
+                stack: error.stack, // Menyertakan stack trace untuk pelacakan error lebih lanjut
+            },
+        });
+    }
+};
+
+// Get all wali kelas with pagination
+const getAllWaliKelas = async (req, res) => {
+    const { page = 1, size = 10 } = req.query; // Ambil parameter `page` dan `size` dari query string
+    const { limit, offset } = getPagination(page, size); // Gunakan helper untuk limit dan offset
+    const baseUrl = '/api/wali-kelas'; // Pastikan baseUrl didefinisikan
+
+    try {
+        // Fetch data dengan pagination dan include relasi users
+        const data = await teacherModel.findAndCountAll({
+            where: {
+                is_wali_kelas: 1, // Filter hanya wali kelas
+            },
+            limit,
+            offset,
+            include: [
+                {
+                    model: userModel,
+                    as: 'user', // Pastikan alias sesuai dengan relasi di model
+                    attributes: ['email'], // Ambil hanya atribut email
+                },
+            ],
+            order: [['created_at', 'DESC']], // Tambahkan order default
+        });
+
+        // Format data untuk pagination
+        const response = getPagingData(data, page, limit, baseUrl);
+
+        // Jika tidak ada data, beri respons kosong
+        if (response.items.length === 0) {
+            return res.status(200).json({
+                message: 'No wali kelas found', // Menyampaikan bahwa tidak ada wali kelas yang ditemukan
+                pagination: response.pagination, // Menyertakan info pagination meskipun tidak ada data
+                items: [], // Mengembalikan array kosong jika tidak ada wali kelas
+            });
+        }
+
+        // Beri respons data yang ditemukan
+        res.status(200).json({
+            message: 'Wali Kelas retrieved successfully', // Pesan sukses
+            pagination: response.pagination, // Info pagination (current page, total pages, etc.)
+            items: response.items, // Data wali kelas yang ditemukan
+        });
+    } catch (error) {
+        console.error('Error fetching wali kelas with pagination:', error);
+
+        // Respons error lebih deskriptif
+        res.status(500).json({
+            message: 'An error occurred while fetching wali kelas', // Pesan umum untuk error
             error: {
                 details: error.message, // Menyertakan rincian error untuk debugging
                 stack: error.stack, // Menyertakan stack trace untuk pelacakan error lebih lanjut
@@ -242,4 +302,5 @@ module.exports = {
     getTeacherById,
     updateTeacher,
     deleteTeacher,
+    getAllWaliKelas
 };
